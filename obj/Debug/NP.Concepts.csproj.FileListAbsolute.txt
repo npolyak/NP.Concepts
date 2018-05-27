@@ -1,0 +1,8 @@
+C:\IDEAS\GITHUB\NP.Roxy\NP.Concepts\NP.Concepts\obj\Debug\NP.Concepts.csprojResolveAssemblyReference.cache
+C:\IDEAS\GITHUB\NP.Roxy\NP.Concepts\NP.Concepts\obj\Debug\NP.Concepts.csproj.CoreCompileInputs.cache
+C:\IDEAS\GITHUB\NP.Roxy\NP.Concepts\NP.Concepts\bin\Debug\NP.Concepts.dll
+C:\IDEAS\GITHUB\NP.Roxy\NP.Concepts\NP.Concepts\bin\Debug\NP.Concepts.pdb
+C:\IDEAS\GITHUB\NP.Roxy\NP.Concepts\NP.Concepts\bin\Debug\NP.Utilities.dll
+C:\IDEAS\GITHUB\NP.Roxy\NP.Concepts\NP.Concepts\bin\Debug\NP.Utilities.pdb
+C:\IDEAS\GITHUB\NP.Roxy\NP.Concepts\NP.Concepts\obj\Debug\NP.Concepts.dll
+C:\IDEAS\GITHUB\NP.Roxy\NP.Concepts\NP.Concepts\obj\Debug\NP.Concepts.pdb
