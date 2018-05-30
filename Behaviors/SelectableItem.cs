@@ -16,7 +16,6 @@ namespace NP.Concepts.Behaviors
         void SelectItem();
     }
 
-    [Implements(typeof(ISelectableItem<>))]
     public class SelectableItem<T> : VMBase, ISelectableItem<T>, INotifyPropertyChanged
         where T : ISelectableItem<T>
     {

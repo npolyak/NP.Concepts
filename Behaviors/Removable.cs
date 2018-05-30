@@ -14,8 +14,6 @@ using System;
 
 namespace NP.Concepts.Behaviors
 {
-
-    [Implements(typeof(IRemovable))]
     public class Removable : IRemovable
     {
         public event Action<IRemovable> RemoveEvent;

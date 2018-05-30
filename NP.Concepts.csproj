@@ -42,7 +42,6 @@
   <ItemGroup>
     <Compile Include="Attributes\ComposableAttribute.cs" />
     <Compile Include="Attributes\EventThisIdxAttribute.cs" />
-    <Compile Include="Attributes\ImplementsAttribute.cs" />
     <Compile Include="Attributes\InOutAttributes.cs" />
     <Compile Include="Attributes\NotComposableAttribute.cs" />
     <Compile Include="Attributes\WrapperInterfaceAttribute.cs" />
