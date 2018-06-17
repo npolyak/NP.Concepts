@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using NP.Concepts.Attributes;
+using System.ComponentModel;
 
 namespace NP.Concepts
 {
@@ -6,6 +7,7 @@ namespace NP.Concepts
     {
 
         #region INotifyPropertyChanged Members
+        [EventThisIdx]
         public event PropertyChangedEventHandler PropertyChanged;
         #endregion
 

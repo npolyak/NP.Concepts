@@ -40,10 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\ClassEventThisIdxAttribute.cs" />
     <Compile Include="Attributes\ComposableAttribute.cs" />
     <Compile Include="Attributes\EventThisIdxAttribute.cs" />
+    <Compile Include="Attributes\ImplementorAttribute.cs" />
     <Compile Include="Attributes\InOutAttributes.cs" />
     <Compile Include="Attributes\NotComposableAttribute.cs" />
+    <Compile Include="Attributes\SharedPropertyAttribute.cs" />
+    <Compile Include="Attributes\SuppressWrappingAttribute.cs" />
     <Compile Include="Attributes\WrapperInterfaceAttribute.cs" />
     <Compile Include="Behaviors\BehaviorsDisposable.cs" />
     <Compile Include="Behaviors\DisposableBehaviorContainer.cs" />
