@@ -58,6 +58,7 @@
     <Compile Include="Behaviors\Removable.cs" />
     <Compile Include="Behaviors\RemovableCollectionBehavior.cs" />
     <Compile Include="Behaviors\SelectableItem.cs" />
+    <Compile Include="Behaviors\SingleSelectionBehavior.cs" />
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
     <Compile Include="CodeBuilder.cs" />
     <Compile Include="CodeUtils.cs" />

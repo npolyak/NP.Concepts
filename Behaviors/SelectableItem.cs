@@ -13,7 +13,22 @@ namespace NP.Concepts.Behaviors
         [EventThisIdx]
         event Action<ISelectableItem<T>> IsSelectedChanged;
 
-        void SelectItem();
+        void Select();
+    }
+
+    public static class SelectableItemExtensions
+    {
+        public static void SelectItem<T>(this ISelectableItem<T> selectableItem)
+            where T : ISelectableItem<T>
+        {
+            selectableItem.IsSelected = true;
+        }
+
+        public static void ToggleSelection<T>(this ISelectableItem<T> selectableItem) 
+            where T : ISelectableItem<T>
+        {
+            selectableItem.IsSelected = !selectableItem.IsSelected;
+        }
     }
 
 
@@ -45,14 +60,9 @@ namespace NP.Concepts.Behaviors
 
         public event Action<ISelectableItem<T>> IsSelectedChanged;
 
-        public void SelectItem()
+        public void Select()
         {
-            this.IsSelected = true;
-        }
-
-        public void ToggleSelection()
-        {
-            this.IsSelected = !this.IsSelected;
+            this.SelectItem();
         }
     }
 
