@@ -62,6 +62,7 @@
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
     <Compile Include="CodeBuilder.cs" />
     <Compile Include="CodeUtils.cs" />
+    <Compile Include="IConverter.cs" />
     <Compile Include="Expressions\ExprStringBuilder.cs" />
     <Compile Include="Expressions\ReplaceFirstArgExprStringBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
