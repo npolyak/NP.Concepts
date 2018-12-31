@@ -19,12 +19,12 @@ namespace NP.Concepts.Behaviors
 
         protected override void UnsetItem(T item)
         {
-            UnsetItemEvent.Invoke(item);
+            UnsetItemEvent?.Invoke(item);
         }
 
         protected override void SetItem(T item)
         {
-            SetItemEvent.Invoke(item);
+            SetItemEvent?.Invoke(item);
         }
     }
 }
