@@ -24,7 +24,7 @@ namespace NP.Concepts.Behaviors
         public T TheObjectTheBehaviorsAreAttachedTo =>
             _disposableBehaviors.LastOrDefault().TheObjectTheBehaviorIsAttachedTo;
 
-        public BehaviorsDisposable
+        internal BehaviorsDisposable
         (
             DisposableBehaviorContainer<T> disposableBehaviorToAdd,
             BehaviorsDisposable<T> previousBehavior = null

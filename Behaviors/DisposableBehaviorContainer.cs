@@ -12,7 +12,7 @@ using System;
 
 namespace NP.Concepts.Behaviors
 {
-    public class DisposableBehaviorContainer<T> : IDisposable
+    internal class DisposableBehaviorContainer<T> : IDisposable
     {
         public IStatelessBehavior<T> TheBehavior { get; }
         public T TheObjectTheBehaviorIsAttachedTo { get; }
