@@ -11,7 +11,7 @@ namespace NP.Concepts.Behaviors
         bool IsSelected { get; set; }
 
         [EventThisIdx]
-        event Action<ISelectableItem<T>> IsSelectedChanged;
+        event Action<T> IsSelectedChanged;
 
         void Select();
     }
@@ -32,8 +32,8 @@ namespace NP.Concepts.Behaviors
     }
 
 
-    public class SelectableItem<T> : VMBase, ISelectableItem<T>, INotifyPropertyChanged
-        where T : ISelectableItem<T>
+    public class SelectableItem<TSelectableItem> : VMBase, ISelectableItem<TSelectableItem>, INotifyPropertyChanged
+        where TSelectableItem : SelectableItem<TSelectableItem>
     {
         bool _isSelected = false;
 
@@ -52,13 +52,13 @@ namespace NP.Concepts.Behaviors
 
                 _isSelected = value;
 
-                IsSelectedChanged?.Invoke(this);
+                IsSelectedChanged?.Invoke((TSelectableItem) this);
 
                 OnPropertyChanged(nameof(IsSelected));
             }
         }
 
-        public event Action<ISelectableItem<T>> IsSelectedChanged;
+        public event Action<TSelectableItem> IsSelectedChanged;
 
         public void Select()
         {
@@ -68,7 +68,7 @@ namespace NP.Concepts.Behaviors
 
     [WrapperInterface(typeof(ISelectableItem<>))]
     public interface ISelectableItemWrapper<T>
-        where T : ISelectableItem<T>
+        where T : SelectableItem<T>
     {
         SelectableItem<T> TheSelectableItem { get; }
     }

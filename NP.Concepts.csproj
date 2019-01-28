@@ -54,10 +54,12 @@
     <Compile Include="Behaviors\InsertBehavior.cs" />
     <Compile Include="Behaviors\IRemovable.cs" />
     <Compile Include="Behaviors\IStatelessBehavior.cs" />
+    <Compile Include="Behaviors\MultiSelectionBehavior.cs" />
     <Compile Include="Behaviors\ParentChildSelectionBehavior.cs" />
     <Compile Include="Behaviors\Removable.cs" />
     <Compile Include="Behaviors\RemovableCollectionBehavior.cs" />
     <Compile Include="Behaviors\SelectableItem.cs" />
+    <Compile Include="Behaviors\SelectableItemWithData.cs" />
     <Compile Include="Behaviors\SingleSelectionBehavior.cs" />
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
     <Compile Include="CodeBuilder.cs" />
