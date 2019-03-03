@@ -38,6 +38,14 @@ namespace NP.Concepts.Behaviors
             _disposableBehaviors.Add(disposableBehaviorToAdd);
         }
 
+        public void Reset()
+        {
+            foreach(var behaviorContainer in _disposableBehaviors)
+            {
+                behaviorContainer.ResetBehavior();
+            }
+        }
+
         public void Dispose()
         {
             foreach(DisposableBehaviorContainer<T> behaviorContainer in _disposableBehaviors)

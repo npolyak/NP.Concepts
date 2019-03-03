@@ -43,7 +43,9 @@ namespace NP.Concepts.Expressions
             Expression propertyGetterExpression =
                 Expression.Property(typedObjectExpression, propertyName);
 
-            result = Expression.Lambda<Func<object, object>>(propertyGetterExpression, paramExpression).Compile();
+            UnaryExpression valueCastExpression = Expression.Convert(propertyGetterExpression, typeof(object));
+
+            result = Expression.Lambda<Func<object, object>>(valueCastExpression, paramExpression).Compile();
 
             _untypedGettersCache.AddKeyValue(objType, propertyName, result);
 

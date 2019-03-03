@@ -9,9 +9,9 @@ namespace NP.Concepts.Behaviors
     {
         private IEnumerable<T> _collection;
 
-        private ObservableCollection<T> _selectedItems = new ObservableCollection<T>();
+        private ObservableCollection<T> _selectedItems;
 
-        IDisposable _behaviorDisposable = null;
+        BehaviorsDisposable<IEnumerable<T>> _behaviorDisposable = null;
 
         public IEnumerable<T> Collection
         {
@@ -45,6 +45,19 @@ namespace NP.Concepts.Behaviors
             }
         }
 
-        public IEnumerable<T> SelectedItems { get => _selectedItems; } 
+        public ObservableCollection<T> SelectedItems
+        {
+            get => _selectedItems;
+
+            set
+            {
+                if (ReferenceEquals(_selectedItems, value))
+                    return;
+
+                _selectedItems = value;
+
+                _behaviorDisposable.Reset();
+            }
+        } 
     }
 }

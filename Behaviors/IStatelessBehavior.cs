@@ -17,4 +17,13 @@ namespace NP.Concepts.Behaviors
 
         void Detach(T obj);
     }
+
+    public static class StatelessBehaviorUtils
+    {
+        public static void Reset<T>(this IStatelessBehavior<T> behavior, T obj)
+        {
+            behavior.Detach(obj);
+            behavior.Attach(obj);
+        }
+    }
 }

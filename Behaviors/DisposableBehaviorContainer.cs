@@ -33,5 +33,10 @@ namespace NP.Concepts.Behaviors
         {
             TheBehavior?.Detach(TheObjectTheBehaviorIsAttachedTo);
         }
+
+        public void ResetBehavior()
+        {
+            TheBehavior?.Reset(TheObjectTheBehaviorIsAttachedTo);
+        }
     }
 }
