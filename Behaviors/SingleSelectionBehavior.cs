@@ -9,16 +9,16 @@ using System.Xml.Serialization;
 
 namespace NP.Concepts.Behaviors
 {
-    public class SingleSelectionBehavior<T> : VMBase
-        where T : class, ISelectableItem<T>
+    public class SingleSelectionBehavior<TElement, TSelectable> : VMBase
+        where TSelectable : class, ISelectableItem<TSelectable>
     {
         IDisposable _behaviorDisposable = null;
         public event Action SelectedItemChangedEvent = null;
 
 
         #region TheCollection Property
-        private IEnumerable<T> _collection;
-        public IEnumerable<T> TheCollection
+        private IEnumerable<TElement> _collection;
+        public IEnumerable<TElement> TheCollection
         {
             get => _collection;
             set
@@ -31,18 +31,28 @@ namespace NP.Concepts.Behaviors
                 _behaviorDisposable =
                     _collection?.AddBehavior
                     (
-                        (item) => item.IsSelectedChanged += Item_IsSelectedChanged,
-                        (item) => item.IsSelectedChanged -= Item_IsSelectedChanged
+                        (item) => ((TSelectable) (object) item).IsSelectedChanged += Item_IsSelectedChanged,
+                        (item) => ((TSelectable) (object)item).IsSelectedChanged -= Item_IsSelectedChanged
                     );
             }
         }
         #endregion TheCollection Property
 
-        private void Item_IsSelectedChanged(ISelectableItem<T> item)
+        public SingleSelectionBehavior()
+        {
+
+        }
+
+        public SingleSelectionBehavior(IEnumerable<TElement> collection)
+        {
+            TheCollection = collection;
+        }
+
+        private void Item_IsSelectedChanged(ISelectableItem<TSelectable> item)
         {
             if (item.IsSelected)
             {
-                this.TheSelectedItem = (T)item;
+                this.TheSelectedItem = (TSelectable)item;
             }
             else
             {
@@ -51,9 +61,9 @@ namespace NP.Concepts.Behaviors
         }
 
         #region TheSelectedItem Property
-        private T _selectedItem;
+        private TSelectable _selectedItem;
         [XmlIgnore]
-        public T TheSelectedItem
+        public TSelectable TheSelectedItem
         {
             get
             {
@@ -83,5 +93,19 @@ namespace NP.Concepts.Behaviors
             }
         }
         #endregion TheSelectedItem Property
+    }
+
+    public class SingleSelectionBehavior<TSelectable> : SingleSelectionBehavior<TSelectable, TSelectable>
+         where TSelectable : class, ISelectableItem<TSelectable>
+    {
+        public SingleSelectionBehavior()
+        {
+
+        }
+
+        public SingleSelectionBehavior(IEnumerable<TSelectable> collection)
+        {
+            TheCollection = collection;
+        }
     }
 }
