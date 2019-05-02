@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NP.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -31,8 +32,19 @@ namespace NP.Concepts.Behaviors
                 _behaviorDisposable =
                     _collection?.AddBehavior
                     (
-                        (item) => ((TSelectable) (object) item).IsSelectedChanged += Item_IsSelectedChanged,
-                        (item) => ((TSelectable) (object)item).IsSelectedChanged -= Item_IsSelectedChanged
+                        (item) => ((TSelectable)(object)item).IsSelectedChanged += Item_IsSelectedChanged,
+                        (item) => ((TSelectable)(object)item).IsSelectedChanged -= Item_IsSelectedChanged
+                    )
+                    .AddBehavior
+                    (
+                        null, 
+                        (item) =>
+                        {
+                            if (item.ObjEquals(TheSelectedItem) && (TheSelectedItem != null))
+                            {
+                                TheSelectedItem = null;
+                            }
+                        }
                     );
             }
         }

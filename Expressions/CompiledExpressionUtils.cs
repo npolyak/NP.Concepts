@@ -108,7 +108,7 @@ namespace NP.Concepts.Expressions
                 return result;
             }
 
-            Type propertyType = objType.GetProperty(propertyName).PropertyType;
+            Type propertyType = objType.GetPropType(propertyName);
 
             ParameterExpression objParamExpression = Expression.Parameter(typeof(object));
 
@@ -167,7 +167,7 @@ namespace NP.Concepts.Expressions
                 return resultObj as Action<TObject, object>;
             }
 
-            Type propertyType = objType.GetProperty(propertyName).PropertyType;
+            Type propertyType = objType.GetPropType(propertyName);
 
             ParameterExpression objParamExpression = 
                 Expression.Parameter(objType);
