@@ -54,13 +54,16 @@
     <Compile Include="Behaviors\DoForEachItemCollectionBehavior.cs" />
     <Compile Include="Behaviors\ForEachItemCollectionBehaviorBase.cs" />
     <Compile Include="Behaviors\ForEachItemEventCollectionBehavior.cs" />
+    <Compile Include="Behaviors\IMultiSelectionWithSearchVm.cs" />
     <Compile Include="Behaviors\InsertBehavior.cs" />
     <Compile Include="Behaviors\IRemovable.cs" />
+    <Compile Include="Behaviors\ISearchable.cs" />
     <Compile Include="Behaviors\IStatelessBehavior.cs" />
-    <Compile Include="Behaviors\MultiSelectionBehavior.cs" />
+    <Compile Include="Behaviors\MultiSelectionWithSearchVm.cs" />
     <Compile Include="Behaviors\ParentChildSelectionBehavior.cs" />
     <Compile Include="Behaviors\Removable.cs" />
     <Compile Include="Behaviors\RemovableCollectionBehavior.cs" />
+    <Compile Include="Behaviors\SelectableAndSearchable.cs" />
     <Compile Include="Behaviors\SelectableItem.cs" />
     <Compile Include="Behaviors\SelectableItemWithData.cs" />
     <Compile Include="Behaviors\SingleSelectionBehavior.cs" />
