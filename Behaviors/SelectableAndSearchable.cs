@@ -3,7 +3,23 @@
     public class SelectableAndSearchable<T> : SelectableItem<T>, ISearchable
         where T : SelectableAndSearchable<T>
     {
-        public string SearchableStr { get; protected set; }
+        public string SearchableStr { get; private set; }
+
+        string _originalSearchableStr;
+
+        public string OriginalSearchableStr
+        {
+            get => _originalSearchableStr;
+            protected set
+            {
+                if (_originalSearchableStr == value)
+                    return;
+
+                _originalSearchableStr = value;
+
+                SearchableStr = _originalSearchableStr?.ToLower();
+            }
+        }
 
         #region SearchStr Property
         private string _searchStr;

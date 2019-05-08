@@ -2,9 +2,11 @@
 {
     public interface ISearchable
     {
-        string SearchStr { get; set; }
+        string OriginalSearchableStr { get; }
 
         string SearchableStr { get; }
+
+        string SearchStr { get; set; }
     }
 
     public static class SearchableUtils
