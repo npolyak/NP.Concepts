@@ -50,6 +50,7 @@
     <Compile Include="Attributes\SuppressWrappingAttribute.cs" />
     <Compile Include="Attributes\WrapperInterfaceAttribute.cs" />
     <Compile Include="Behaviors\BehaviorsDisposable.cs" />
+    <Compile Include="Behaviors\DeepMultiSelectionWithSearchVm.cs" />
     <Compile Include="Behaviors\DisposableBehaviorContainer.cs" />
     <Compile Include="Behaviors\DoForEachItemCollectionBehavior.cs" />
     <Compile Include="Behaviors\ForEachItemCollectionBehaviorBase.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Behaviors\IRemovable.cs" />
     <Compile Include="Behaviors\ISearchable.cs" />
     <Compile Include="Behaviors\IStatelessBehavior.cs" />
+    <Compile Include="Behaviors\MultiSelectionWithSearchBase.cs" />
     <Compile Include="Behaviors\MultiSelectionWithSearchVm.cs" />
     <Compile Include="Behaviors\ParentChildSelectionBehavior.cs" />
     <Compile Include="Behaviors\Removable.cs" />
@@ -68,6 +70,7 @@
     <Compile Include="Behaviors\SelectableItemWithData.cs" />
     <Compile Include="Behaviors\SingleSelectionBehavior.cs" />
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
+    <Compile Include="Cache.cs" />
     <Compile Include="CodeBuilder.cs" />
     <Compile Include="CodeUtils.cs" />
     <Compile Include="Expressions\CompiledExpressionUtils.cs" />
