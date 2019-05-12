@@ -69,6 +69,7 @@
     <Compile Include="Behaviors\SelectableItem.cs" />
     <Compile Include="Behaviors\SelectableItemWithData.cs" />
     <Compile Include="Behaviors\SingleSelectionBehavior.cs" />
+    <Compile Include="Behaviors\SingleSelectionCollection.cs" />
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="CodeBuilder.cs" />

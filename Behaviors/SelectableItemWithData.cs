@@ -2,7 +2,8 @@
 
 namespace NP.Concepts.Behaviors
 {
-    public class SelectableItemWithData<T> : SelectableItem<SelectableItemWithData<T>>
+    public class SelectableItemWithData<T> : 
+        SelectableItem<SelectableItemWithData<T>>
     {
         public T Data { get; }
 
@@ -29,6 +30,18 @@ namespace NP.Concepts.Behaviors
         public override string ToString()
         {
             return Data?.ToString();
+        }
+
+        public static implicit operator
+            SelectableItemWithData<T>(T value)
+        {
+            return new SelectableItemWithData<T>(value);
+        }
+
+        public static implicit operator
+            T(SelectableItemWithData<T> selectableItem)
+        {
+            return selectableItem.Data;
         }
     }
 

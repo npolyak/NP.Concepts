@@ -32,7 +32,10 @@ namespace NP.Concepts.Behaviors
     }
 
 
-    public class SelectableItem<TSelectableItem> : VMBase, ISelectableItem<TSelectableItem>, INotifyPropertyChanged
+    public class SelectableItem<TSelectableItem> : 
+        VMBase, 
+        ISelectableItem<TSelectableItem>, 
+        INotifyPropertyChanged
         where TSelectableItem : SelectableItem<TSelectableItem>
     {
         bool _isSelected = false;
