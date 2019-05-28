@@ -71,7 +71,6 @@
     <Compile Include="Behaviors\SingleSelectionBehavior.cs" />
     <Compile Include="Behaviors\SingleSelectionCollection.cs" />
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
-    <Compile Include="Cache.cs" />
     <Compile Include="CodeBuilder.cs" />
     <Compile Include="CodeUtils.cs" />
     <Compile Include="Expressions\CompiledExpressionUtils.cs" />
