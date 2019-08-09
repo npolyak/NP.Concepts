@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NP.Concepts</RootNamespace>
     <AssemblyName>NP.Concepts</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -58,6 +58,7 @@
     <Compile Include="Behaviors\IMultiSelectionWithSearchVm.cs" />
     <Compile Include="Behaviors\InsertBehavior.cs" />
     <Compile Include="Behaviors\IRemovable.cs" />
+    <Compile Include="Behaviors\ISaveRestoreClearDelete.cs" />
     <Compile Include="Behaviors\ISearchable.cs" />
     <Compile Include="Behaviors\IStatelessBehavior.cs" />
     <Compile Include="Behaviors\MultiSelectionWithSearchBase.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
     <Compile Include="CodeBuilder.cs" />
     <Compile Include="CodeUtils.cs" />
+    <Compile Include="ComponentSaverRestorer.cs" />
     <Compile Include="Expressions\CompiledExpressionUtils.cs" />
     <Compile Include="IConverter.cs" />
     <Compile Include="Expressions\ExprStringBuilder.cs" />

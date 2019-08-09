@@ -6,4 +6,4 @@
     }
 
     public interface IConverter : IConverter<object, object> { }
- }
+}

@@ -14,20 +14,24 @@ using System.Collections.Specialized;
 
 namespace NP.Concepts.Behaviors
 {
-    public abstract class ForEachItemCollectionBehaviorBase<T> :
-        IStatelessBehavior<IEnumerable<T>>
+    public abstract class ForEachItemCollectionBehaviorBase<TCollItem, TBehaviorItem> :
+        IStatelessBehavior<IEnumerable<TCollItem>>
+        where TBehaviorItem : TCollItem
     {
-        protected abstract void UnsetItem(T item);
-        protected abstract void SetItem(T item);
+        protected abstract void UnsetItem(TBehaviorItem item);
+        protected abstract void SetItem(TBehaviorItem item);
 
         private void UnsetItems(IEnumerable items)
         {
             if (items == null)
                 return;
 
-            foreach (T item in items)
+            foreach (TCollItem item in items)
             {
-                UnsetItem(item);
+                if (item is TBehaviorItem behaviorItem)
+                {
+                    UnsetItem(behaviorItem);
+                }
             }
         }
 
@@ -36,9 +40,12 @@ namespace NP.Concepts.Behaviors
             if (items == null)
                 return;
 
-            foreach (T item in items)
+            foreach (TCollItem item in items)
             {
-                SetItem(item);
+                if (item is TBehaviorItem behaviorItem)
+                {
+                    SetItem(behaviorItem);
+                }
             }
         }
 
@@ -49,7 +56,7 @@ namespace NP.Concepts.Behaviors
             SetItems(e.NewItems);
         }
 
-        public void Detach(IEnumerable<T> collection)
+        public void Detach(IEnumerable<TCollItem> collection)
         {
             if (collection == null)
                 return;
@@ -65,7 +72,7 @@ namespace NP.Concepts.Behaviors
             UnsetItems(collection);
         }
 
-        public void Attach(IEnumerable<T> collection)
+        public void Attach(IEnumerable<TCollItem> collection)
         {
             if (collection == null)
                 return;

@@ -12,17 +12,19 @@ using System;
 
 namespace NP.Concepts.Behaviors
 {
-    public class ForEachItemEventCollectionBehavior<T> : ForEachItemCollectionBehaviorBase<T>
+    public class ForEachItemEventCollectionBehavior<TCollItem, TBehaviorItem> : 
+        ForEachItemCollectionBehaviorBase<TCollItem, TBehaviorItem>
+        where TBehaviorItem : TCollItem
     {
-        public event Action<T> UnsetItemEvent;
-        public event Action<T> SetItemEvent;
+        public event Action<TBehaviorItem> UnsetItemEvent;
+        public event Action<TBehaviorItem> SetItemEvent;
 
-        protected override void UnsetItem(T item)
+        protected override void UnsetItem(TBehaviorItem item)
         {
             UnsetItemEvent?.Invoke(item);
         }
 
-        protected override void SetItem(T item)
+        protected override void SetItem(TBehaviorItem item)
         {
             SetItemEvent?.Invoke(item);
         }
