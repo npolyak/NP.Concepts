@@ -87,7 +87,7 @@ namespace NP.Concepts.Behaviors
 
         public static BehaviorsDisposable<IEnumerable> AddBehavior<TCollItem>
         (
-            this IEnumerable<TCollItem> collection,
+            this IEnumerable collection,
             DoForEachItemCollectionBehavior<TCollItem, TCollItem> behavior
         ) => AddBehavior<TCollItem, TCollItem>(collection, behavior);
 
