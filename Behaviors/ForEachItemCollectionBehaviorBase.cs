@@ -15,7 +15,7 @@ using System.Collections.Specialized;
 namespace NP.Concepts.Behaviors
 {
     public abstract class ForEachItemCollectionBehaviorBase<TCollItem, TBehaviorItem> :
-        IStatelessBehavior<IEnumerable<TCollItem>>
+        IStatelessBehavior<IEnumerable>
         where TBehaviorItem : TCollItem
     {
         protected abstract void UnsetItem(TBehaviorItem item);
@@ -56,7 +56,7 @@ namespace NP.Concepts.Behaviors
             SetItems(e.NewItems);
         }
 
-        public void Detach(IEnumerable<TCollItem> collection)
+        public void Detach(IEnumerable collection)
         {
             if (collection == null)
                 return;
@@ -72,7 +72,7 @@ namespace NP.Concepts.Behaviors
             UnsetItems(collection);
         }
 
-        public void Attach(IEnumerable<TCollItem> collection)
+        public void Attach(IEnumerable collection)
         {
             if (collection == null)
                 return;

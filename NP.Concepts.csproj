@@ -74,12 +74,14 @@
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
     <Compile Include="CodeBuilder.cs" />
     <Compile Include="CodeUtils.cs" />
-    <Compile Include="ComponentSaverRestorer.cs" />
+    <Compile Include="CustomItemsManager.cs" />
+    <Compile Include="ItemSaverRestorer.cs" />
     <Compile Include="Expressions\CompiledExpressionUtils.cs" />
     <Compile Include="IConverter.cs" />
     <Compile Include="Expressions\ExprStringBuilder.cs" />
     <Compile Include="Expressions\ReplaceFirstArgExprStringBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SaveableItemInfo.cs" />
     <Compile Include="TypeUtils.cs" />
     <Compile Include="ValueHolder.cs" />
     <Compile Include="VMBase.cs" />

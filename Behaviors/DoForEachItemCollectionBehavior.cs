@@ -9,6 +9,7 @@
 // Also, please, mention this software in any documentation for the 
 // products that use it.
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace NP.Concepts.Behaviors
@@ -42,31 +43,31 @@ namespace NP.Concepts.Behaviors
 
     public static class DoForEachBehaviorUtils
     {
-        private static BehaviorsDisposable<IEnumerable<TCollItem>> AddBehaviorImpl<TCollItem, TBehaviorItem>
+        private static BehaviorsDisposable<IEnumerable> AddBehaviorImpl<TCollItem, TBehaviorItem>
         (
-            this IEnumerable<TCollItem> collection,
+            this IEnumerable collection,
             DoForEachItemCollectionBehavior<TCollItem, TBehaviorItem> behavior,
-            BehaviorsDisposable<IEnumerable<TCollItem>> previousBehavior = null
+            BehaviorsDisposable<IEnumerable> previousBehavior = null
         ) where TBehaviorItem : TCollItem
         {
             if (collection == null)
                 return null;
 
-            DisposableBehaviorContainer<IEnumerable<TCollItem>> behaviorContainer =
-                new DisposableBehaviorContainer<IEnumerable<TCollItem>>(behavior, collection);
+            DisposableBehaviorContainer<IEnumerable> behaviorContainer =
+                new DisposableBehaviorContainer<IEnumerable>(behavior, collection);
 
-            BehaviorsDisposable<IEnumerable<TCollItem>> behaviorsDisposable =
-                new BehaviorsDisposable<IEnumerable<TCollItem>>(behaviorContainer, previousBehavior);
+            BehaviorsDisposable<IEnumerable> behaviorsDisposable =
+                new BehaviorsDisposable<IEnumerable>(behaviorContainer, previousBehavior);
 
             return behaviorsDisposable;
         }
 
-        private static BehaviorsDisposable<IEnumerable<TCollItem>> AddBehaviorImpl<TCollItem, TBehaviorItem>
+        private static BehaviorsDisposable<IEnumerable> AddBehaviorImpl<TCollItem, TBehaviorItem>
         (
-            this IEnumerable<TCollItem> collection,
+            this IEnumerable collection,
             Action<TBehaviorItem> onAdd,
             Action<TBehaviorItem> onRemove = null,
-            BehaviorsDisposable<IEnumerable<TCollItem>> previousBehavior = null
+            BehaviorsDisposable<IEnumerable> previousBehavior = null
         ) where TBehaviorItem : TCollItem
         {
             DoForEachItemCollectionBehavior<TCollItem, TBehaviorItem> behavior =
@@ -75,54 +76,54 @@ namespace NP.Concepts.Behaviors
             return collection?.AddBehaviorImpl<TCollItem, TBehaviorItem>(behavior, previousBehavior);
         }
 
-        public static BehaviorsDisposable<IEnumerable<TCollItem>> AddBehavior<TCollItem, TBehaviorItem>
+        public static BehaviorsDisposable<IEnumerable> AddBehavior<TCollItem, TBehaviorItem>
         (
-            this IEnumerable<TCollItem> collection,
+            this IEnumerable collection,
             DoForEachItemCollectionBehavior<TCollItem, TBehaviorItem> behavior
         ) where TBehaviorItem : TCollItem
         {
             return collection.AddBehaviorImpl(behavior);
         }
 
-        public static BehaviorsDisposable<IEnumerable<TCollItem>> AddBehavior<TCollItem>
+        public static BehaviorsDisposable<IEnumerable> AddBehavior<TCollItem>
         (
             this IEnumerable<TCollItem> collection,
             DoForEachItemCollectionBehavior<TCollItem, TCollItem> behavior
         ) => AddBehavior<TCollItem, TCollItem>(collection, behavior);
 
 
-        public static BehaviorsDisposable<IEnumerable<TCollItem>> AddBehavior<TCollItem, TBehaviorItem>
+        public static BehaviorsDisposable<IEnumerable> AddBehavior<TCollItem, TBehaviorItem>
         (
-            this IEnumerable<TCollItem> collection, 
+            this IEnumerable collection, 
             Action<TBehaviorItem> onAdd,
             Action<TBehaviorItem> onRemove = null
         ) where TBehaviorItem : TCollItem
         {
-            return collection.AddBehaviorImpl(onAdd, onRemove);
+            return collection.AddBehaviorImpl<TCollItem, TBehaviorItem>(onAdd, onRemove);
         }
 
-        public static BehaviorsDisposable<IEnumerable<TCollItem>> AddBehavior<TCollItem>
+        public static BehaviorsDisposable<IEnumerable> AddBehavior<TCollItem>
         (
             this IEnumerable<TCollItem> collection,
             Action<TCollItem> onAdd,
             Action<TCollItem> onRemove = null
         ) => AddBehavior<TCollItem, TCollItem>(collection, onAdd, onRemove);
 
-        public static BehaviorsDisposable<IEnumerable<TCollItem>> AddBehavior<TCollItem, TBehaviorItem>
+        public static BehaviorsDisposable<IEnumerable> AddBehavior<TCollItem, TBehaviorItem>
         (
-            this BehaviorsDisposable<IEnumerable<TCollItem>> previousBehaviors,
+            this BehaviorsDisposable<IEnumerable> previousBehaviors,
             Action<TBehaviorItem> onAdd,
             Action<TBehaviorItem> onRemove = null
         ) where TBehaviorItem : TCollItem
         {
-            IEnumerable<TCollItem> collection = previousBehaviors.TheObjectTheBehaviorsAreAttachedTo;
+            IEnumerable collection = previousBehaviors.TheObjectTheBehaviorsAreAttachedTo;
 
             return collection.AddBehaviorImpl<TCollItem, TBehaviorItem>(onAdd, onRemove, previousBehaviors);
         }
 
-        public static BehaviorsDisposable<IEnumerable<TCollItem>> AddBehavior<TCollItem>
+        public static BehaviorsDisposable<IEnumerable> AddBehavior<TCollItem>
         (
-            this BehaviorsDisposable<IEnumerable<TCollItem>> previousBehaviors,
+            this BehaviorsDisposable<IEnumerable> previousBehaviors,
             Action<TCollItem> onAdd,
             Action<TCollItem> onRemove = null
         )

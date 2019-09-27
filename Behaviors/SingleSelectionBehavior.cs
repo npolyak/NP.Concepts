@@ -30,7 +30,7 @@ namespace NP.Concepts.Behaviors
                         (item) => ((TSelectable)(object)item).IsSelectedChanged += Item_IsSelectedChanged,
                         (item) => ((TSelectable)(object)item).IsSelectedChanged -= Item_IsSelectedChanged
                     )
-                    .AddBehavior
+                    .AddBehavior<TElement>
                     (
                         null, 
                         (item) =>

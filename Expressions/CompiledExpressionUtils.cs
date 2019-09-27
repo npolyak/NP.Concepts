@@ -148,6 +148,46 @@ namespace NP.Concepts.Expressions
             return GetUntypedCSPropertySetterByObjType(obj.GetType(), propertyName);
         }
 
+
+        public static Action<object, object> GetUntypedVoidSingleArgMethodByObjType
+        (
+            this Type objType, 
+            string methodName
+        )
+        {
+            Action<object, object> result;
+
+            if (_untypedSettersCache.TryGetValue(objType, methodName, out result))
+            {
+                return result;
+            }
+
+            Type methodArgType = objType.GetMethodArgType(methodName);
+
+            ParameterExpression objParamExpression = Expression.Parameter(typeof(object));
+
+            UnaryExpression objCastExpression = Expression.Convert(objParamExpression, objType);
+
+            ParameterExpression inputParamExpression = Expression.Parameter(methodArgType, methodName);
+
+            ParameterExpression valueParamExpression = Expression.Parameter(typeof(object));
+            UnaryExpression valueCastExpression = Expression.Convert(valueParamExpression, methodArgType);
+
+            MethodCallExpression methodExpression = Expression.Call(objCastExpression, methodName, null, valueCastExpression);
+
+            result = Expression.Lambda<Action<object, object>>
+            (
+                 methodExpression,
+                 objParamExpression,
+                 valueParamExpression
+            ).Compile();
+
+            _untypedSettersCache.AddKeyValue(objType, methodName, result);
+
+            return result;
+        }
+
+
         static DoubleParamMap<Type, string, object> _typedSettersCache =
             new DoubleParamMap<Type, string, object>();
 
