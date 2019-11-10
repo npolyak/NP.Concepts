@@ -7,22 +7,22 @@ namespace NP.Concepts
     public class SaveableItemInfo : VMBase, ICopyable<SaveableItemInfo>
     {
         #region IsComponent Property
-        private bool _isComponent;
+        private bool _isComposite;
         [XmlAttribute]
         public bool IsComponent
         {
             get
             {
-                return this._isComponent;
+                return this._isComposite;
             }
             set
             {
-                if (this._isComponent == value)
+                if (this._isComposite == value)
                 {
                     return;
                 }
 
-                this._isComponent = value;
+                this._isComposite = value;
                 this.OnPropertyChanged(nameof(IsComponent));
             }
         }
