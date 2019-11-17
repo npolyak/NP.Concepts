@@ -3,86 +3,121 @@ using NP.Utilities;
 using NP.Utilities.BasicInterfaces;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace NP.Concepts.ComponentFolders
 {
-    public class ComponentFolder<TId> : ComponentDisplayMetadata
+    public class ComponentFolder<TId, TMetaData> : IComponentMetaDataContainer<TMetaData>, INotifyPropertyChanged
         where TId : INameContainer
+        where TMetaData : class, IComponentDisplayMetadata
     {
-        public override bool IsFolder => true;
+        public bool IsFolder => true;
 
-        public ObservableCollection<ComponentFolder<TId>> SubFolders { get; } =
-            new ObservableCollection<ComponentFolder<TId>>();
+        public TMetaData MetaData { get; }
 
-        public ObservableCollection<ComponentIdWithDisplayMetadata<TId>> ComponentInfos { get; } =
-            new ObservableCollection<ComponentIdWithDisplayMetadata<TId>>();
+        public ObservableCollection<ComponentFolder<TId, TMetaData>> SubFolders { get; } =
+            new ObservableCollection<ComponentFolder<TId, TMetaData>>();
 
-        public ObservableCollection<ComponentDisplayMetadata> FoldersAndComponents { get; } =
-            new ObservableCollection<ComponentDisplayMetadata>();
+        public ObservableCollection<ComponentIdWithDisplayMetadata<TId, TMetaData>> ComponentInfos { get; } =
+            new ObservableCollection<ComponentIdWithDisplayMetadata<TId, TMetaData>>();
 
-        public ComponentFolder<TId> FindSubFolder(string subFolderName)
+        public ObservableCollection<IComponentMetaDataContainer<TMetaData>> FoldersAndComponents { get; } =
+            new ObservableCollection<IComponentMetaDataContainer<TMetaData>>();
+
+        public ComponentFolder<TId, TMetaData> FindSubFolder(string subFolderName)
         {
             return SubFolders
-                       .FirstOrDefault(f => f.DisplayName == subFolderName);
+                       .FirstOrDefault(f => f.MetaData.DisplayName == subFolderName);
         }
 
         public void Add(TId componentId)
         {
-            ComponentIdWithDisplayMetadata<TId> componentInfo =
-                new ComponentIdWithDisplayMetadata<TId>(componentId);
+            ComponentIdWithDisplayMetadata<TId, TMetaData> componentInfo =
+                new ComponentIdWithDisplayMetadata<TId, TMetaData>(componentId);
 
             ComponentInfos.Add(componentInfo);
         }
 
-        public ComponentFolder<TId> AddSubFolder
+        public ComponentFolder<TId, TMetaData> AddSubFolder
         (
-            string name,
-            string icon = null,
-            string description = null)
+            TMetaData subFolderMetaData    
+        )
         {
-            ComponentFolder<TId> subFolder =
-                new ComponentFolder<TId>(name, icon, description);
+            ComponentFolder<TId, TMetaData> subFolder =
+                new ComponentFolder<TId, TMetaData>(subFolderMetaData);
 
             SubFolders.Add(subFolder);
 
             return subFolder;
         }
 
-        public ComponentFolder<TId> GetOrAddFolder
+        public ComponentFolder<TId, TMetaData> GetOrAddFolder
         (
-            string name,
-            string icon = null,
-            string description = null)
+            TMetaData subFolderMetaData    
+        )
         {
-            ComponentFolder<TId> subFolder =
-                FindSubFolder(name) ?? AddSubFolder(name, icon, description);
+            ComponentFolder<TId, TMetaData> subFolder =
+                FindSubFolder(subFolderMetaData.DisplayName) ?? AddSubFolder(subFolderMetaData);
 
             return subFolder;
         }
 
         IDisposable _subFoldersBehavior;
         IDisposable _bbsBehavior;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propName)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        }
+
+        public bool IsMatching => true;
+
+        #region SearchStr Property
+        private string _searchStr;
+        public string SearchStr
+        {
+            get
+            {
+                return this._searchStr;
+            }
+            set
+            {
+                if (this._searchStr == value)
+                {
+                    return;
+                }
+
+                this._searchStr = value;
+                this.OnPropertyChanged(nameof(SearchStr));
+
+                var allComponents = this.GetAllNonFolderComponents<TId, TMetaData>().ToList();
+                foreach (var descendant in allComponents)
+                {
+                    if (!descendant.IsFolder)
+                    {
+                        descendant.CheckMatching(_searchStr);
+                    }
+                }
+            }
+        }
+        #endregion SearchStr Property
+
+
         public ComponentFolder
         (
-            string name,
-            string icon = null,
-            string description = null
+            TMetaData metaData
         )
-            :
-            base(name, icon, description)
         {
-            _subFoldersBehavior = SubFolders.AddBehavior<ComponentDisplayMetadata>(OnAddItem, OnRemoveItem);
-            _bbsBehavior = ComponentInfos.AddBehavior<ComponentDisplayMetadata>(OnAddItem, OnRemoveItem);
+            MetaData = metaData;
+            _subFoldersBehavior = SubFolders.AddBehavior(OnAddItem, OnRemoveItem);
+            _bbsBehavior = ComponentInfos.AddBehavior<IComponentMetaDataContainer<TMetaData>>(OnAddItem, OnRemoveItem);
         }
 
-        public ComponentFolder(ComponentDisplayMetadata md) :
-            this(md.DisplayName, md.Icon, md.Description)
-        {
-
-        }
-
-        private void OnAddItem(ComponentDisplayMetadata item)
+        private void OnAddItem(IComponentMetaDataContainer<TMetaData> item)
         {
             if (item.IsFolder)
             {
@@ -96,9 +131,14 @@ namespace NP.Concepts.ComponentFolders
             }
         }
 
-        private void OnRemoveItem(ComponentDisplayMetadata item)
+        private void OnRemoveItem(IComponentMetaDataContainer<TMetaData> item)
         {
             FoldersAndComponents.Remove(item);
+        }
+
+        public void CheckMatching(string strToMatch)
+        {
+            
         }
     }
 }

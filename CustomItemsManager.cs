@@ -19,8 +19,32 @@ namespace NP.Concepts
         FolderSaverRestorer ListOfItemsSaverRestorer =>
             TheItemSaverRestorer.SaverRestorer;
 
+        IStrSaveableRestorableClearable _saveableRestorable;
         // interface representing the assembly
-        public IStrSaveableRestorableClearable SaveableRestorable { get; set; }
+        public IStrSaveableRestorableClearable SaveableRestorable 
+        {
+            get => _saveableRestorable;
+            set
+            {
+                if (ReferenceEquals(_saveableRestorable, value))
+                    return;
+
+                _saveableRestorable = value;
+
+                if (_saveableRestorable is INotifyPropertyChanged notifiable)
+                {
+                    notifiable.PropertyChanged += Notifiable_PropertyChanged;
+                }
+            }
+        }
+
+        private void Notifiable_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IStrSaveableRestorableClearable.CanSave))
+            {
+                OnPropertyChanged(nameof(CanSave));
+            }
+        }
 
         public event Action SaveItemEvent;
 
@@ -29,6 +53,9 @@ namespace NP.Concepts
         public event Action<string> DeleteItemEvent;
 
         public event Action IsComponentChangedEvent;
+
+        public bool CanSave => SaveableRestorable.CanSave && 
+                             (CurrentItemInfo?.ItemName.IsNullOrWhiteSpace() == false);
 
         // this is the assembly info that is specified
         // by the name within the text box. 
@@ -118,6 +145,7 @@ namespace NP.Concepts
                 FireIsComponentChanged();
 
                 this.OnPropertyChanged(nameof(CurrentItemInfo));
+                OnPropertyChanged(nameof(CanSave));
             }
         }
 
@@ -155,9 +183,6 @@ namespace NP.Concepts
 
             ListOfItemsSaverRestorer.SaveStr(ListOfItemsFileName, layoutInfosString);
         }
-
-        public bool CanSave =>
-            CurrentItemInfo?.ItemName.IsNullOrWhiteSpace() == false;
 
         private SaveableItemInfo GetMatchingItemInfo(string itemName)
         {

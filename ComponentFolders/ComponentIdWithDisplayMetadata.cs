@@ -1,51 +1,83 @@
-﻿using NP.Utilities.BasicInterfaces;
+﻿using NP.Utilities;
+using NP.Utilities.BasicInterfaces;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace NP.Concepts.ComponentFolders
 {
-    public class ComponentIdWithDisplayMetadata<TId> : ComponentDisplayMetadata
+    public class ComponentIdWithDisplayMetadata<TId, TMetaData> :  
+        IMatchable,
+        IComponentMetaDataContainer<TMetaData>,
+        INotifyPropertyChanged
         where TId : INameContainer
+        where TMetaData : class, IComponentDisplayMetadata
     {
-        internal static Dictionary<TId, ComponentDisplayMetadataBase> MetadataMap { get; } =
-            new Dictionary<TId, ComponentDisplayMetadataBase>();
+        internal static Dictionary<TId, TMetaData> MetadataMap { get; } =
+            new Dictionary<TId, TMetaData>();
 
-        public override bool IsFolder => false;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public bool IsFolder => false;
 
         public TId TheComponentId { get; }
 
-        public ComponentIdWithDisplayMetadata(TId componentId)
-            :
-            base(componentId.GetDisplayMetadata())
+        public TMetaData MetaData { get; }
+
+        bool _isMatching = true;
+        public bool IsMatching
         {
+            get => _isMatching;
+            private set
+            {
+                if (_isMatching == value)
+                    return;
+
+                _isMatching = value;
+
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsMatching)));
+            }
+        }
+
+        public ComponentIdWithDisplayMetadata(TId componentId)
+        {
+            MetaData = componentId.GetDisplayMetadata<TId, TMetaData>();
             TheComponentId = componentId;
+        }
+
+        public void CheckMatching(string str)
+        {
+            if (str.IsNullOrWhiteSpace())
+            {
+                IsMatching = true;
+            }
+
+            IsMatching = MetaData.DisplayName?.ToLower()?.Contains(str?.ToLower()) == true;
         }
     }
 
     public static class ComponentIdExtensions
     {
-        public static void AddDisplayMetaData<TId>
+        public static void AddDisplayMetaData<TId, TMetaData>
         (
             this TId componentId,
-            string icon,
-            string displayName = null,
-            string description = null
+            TMetaData metaData
         )
             where TId : INameContainer
+            where TMetaData : class, IComponentDisplayMetadata
         {
-            ComponentDisplayMetadataBase componentDisplayMetadata =
-                new ComponentDisplayMetadataBase(displayName ?? componentId.Name, icon, description);
-
-            ComponentIdWithDisplayMetadata<TId>.MetadataMap[componentId] = componentDisplayMetadata;
+            ComponentIdWithDisplayMetadata<TId, TMetaData>.MetadataMap[componentId] = metaData;
         }
 
 
-        public static ComponentDisplayMetadataBase GetDisplayMetadata<TId>(this TId componentId) 
+        public static TMetaData GetDisplayMetadata<TId, TMetaData>(this TId componentId) 
             where TId : INameContainer
+            where TMetaData : class, IComponentDisplayMetadata
         {
-            if ( ComponentIdWithDisplayMetadata<TId>.MetadataMap.TryGetValue
+            if ( ComponentIdWithDisplayMetadata<TId, TMetaData>.MetadataMap.TryGetValue
                  (
                      componentId,
-                     out ComponentDisplayMetadataBase md))
+                     out TMetaData md))
             {
                 return md;
             }

@@ -74,11 +74,11 @@
     <Compile Include="Behaviors\SingleSelectionCollection.cs" />
     <Compile Include="Behaviors\SingleSelectionObservableCollection.cs" />
     <Compile Include="ComponentFolders\ComponentDisplayMetadata.cs" />
-    <Compile Include="ComponentFolders\ComponentDisplayMetadataBase.cs" />
     <Compile Include="ComponentFolders\ComponentFolder.cs" />
     <Compile Include="ComponentFolders\ComponentFolderExtensions.cs" />
     <Compile Include="ComponentFolders\ComponentIdWithDisplayMetadata.cs" />
     <Compile Include="ComponentFolders\ComponentLoader.cs" />
+    <Compile Include="ComponentFolders\IComponentMetaDataContainer.cs" />
     <Compile Include="ICircularArrangedItem.cs" />
     <Compile Include="CodeBuilder.cs" />
     <Compile Include="CodeUtils.cs" />

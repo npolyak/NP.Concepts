@@ -7,38 +7,42 @@ namespace NP.Concepts.ComponentFolders
 {
     public static class ComponentFolderExtensions
     {
-        private static IEnumerable<ComponentDisplayMetadata> ToChildren<TId>(this ComponentDisplayMetadata componentDisplayMetadata)
+        private static IEnumerable<IComponentMetaDataContainer<TMetaData>> ToChildren<TId, TMetaData>(this IComponentMetaDataContainer<TMetaData> componentDisplayMetadata)
             where TId : INameContainer
+            where TMetaData : class, IComponentDisplayMetadata
         {
-            if (componentDisplayMetadata is ComponentFolder<TId> componentFolder)
+            if (componentDisplayMetadata is ComponentFolder<TId, TMetaData> componentFolder)
             {
                 return componentFolder.FoldersAndComponents;
             }
 
-            return Enumerable.Empty<ComponentDisplayMetadata>();
+            return Enumerable.Empty<IComponentMetaDataContainer<TMetaData>>();
         }
 
-        public static IEnumerable<ComponentIdWithDisplayMetadata<TId>> GetAllComponents<TId>(this ComponentFolder<TId> folder)
-             where TId : INameContainer
-        {
-            return folder.Descendants<ComponentDisplayMetadata, ComponentIdWithDisplayMetadata<TId>>(ToChildren<TId>);
-        }
-
-        public static (ComponentFolder<TId> componentFolder, ComponentIdWithDisplayMetadata<TId> componentIdWithDisplayMetadata)
-            GetItemAndContainingFolder<TId>(this ComponentFolder<TId> folder, string componentName)
+        public static IEnumerable<ComponentIdWithDisplayMetadata<TId, TMetaData>> GetAllNonFolderComponents<TId, TMetaData>(this IComponentMetaDataContainer<TMetaData> folder)
             where TId : INameContainer
+            where TMetaData : class, IComponentDisplayMetadata
         {
-            TreeNodeInfo<ComponentDisplayMetadata> treeNodeInfo =
-                folder.SelfAndDescendantsWithLevelInfo<ComponentDisplayMetadata>(null, ToChildren<TId>)
-                    .FirstOrDefault(item => item.Node is ComponentIdWithDisplayMetadata<TId> compId && compId.TheComponentId.Name == componentName);
-
-            return (treeNodeInfo?.Parent as ComponentFolder<TId>, treeNodeInfo?.Node as ComponentIdWithDisplayMetadata<TId>);
+            return folder.Descendants<IComponentMetaDataContainer<TMetaData>, ComponentIdWithDisplayMetadata<TId, TMetaData>>(ToChildren<TId, TMetaData>);
         }
 
-        public static void RemoveDescendantNodeByName<TId>(this ComponentFolder<TId> folder, string bbName)
-             where TId : INameContainer
+        public static (ComponentFolder<TId, TMetaData> componentFolder, ComponentIdWithDisplayMetadata<TId, TMetaData> componentIdWithDisplayMetadata)
+            GetItemAndContainingFolder<TId, TMetaData>(this ComponentFolder<TId, TMetaData> folder, string componentName)
+            where TId : INameContainer
+            where TMetaData : class, IComponentDisplayMetadata
         {
-            (ComponentFolder<TId> bbFolder, ComponentIdWithDisplayMetadata<TId> bbIdWithDisplayMetadata) =
+            TreeNodeInfo<IComponentMetaDataContainer<TMetaData>> treeNodeInfo =
+                folder.SelfAndDescendantsWithLevelInfo<IComponentMetaDataContainer<TMetaData>>(null, ToChildren<TId, TMetaData>)
+                    .FirstOrDefault(item => item.Node is ComponentIdWithDisplayMetadata<TId, TMetaData> compId && compId.TheComponentId.Name == componentName);
+
+            return (treeNodeInfo?.Parent as ComponentFolder<TId, TMetaData>, treeNodeInfo?.Node as ComponentIdWithDisplayMetadata<TId, TMetaData>);
+        }
+
+        public static void RemoveDescendantNodeByName<TId, TMetaData>(this ComponentFolder<TId, TMetaData> folder, string bbName)
+            where TId : INameContainer
+            where TMetaData : class, IComponentDisplayMetadata
+        {
+            (ComponentFolder<TId, TMetaData> bbFolder, ComponentIdWithDisplayMetadata<TId, TMetaData> bbIdWithDisplayMetadata) =
                 folder.GetItemAndContainingFolder(bbName);
 
             if (bbIdWithDisplayMetadata != null)

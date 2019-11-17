@@ -13,7 +13,7 @@ namespace NP.Concepts.ComponentFolders
         where TAssemblyAttribute : Attribute, IComponentDisplayMetadata
         where TClassAttribute : Attribute, IComponentDisplayMetadata
     {
-        public ComponentFolder<TId> RootFolder { get; }
+        public ComponentFolder<TId, ComponentDisplayMetadata> RootFolder { get; }
 
         public Func<string, TId> IdFactory { get; }
 
@@ -25,7 +25,7 @@ namespace NP.Concepts.ComponentFolders
         {
             IdFactory = idFactory;
 
-            RootFolder = new ComponentFolder<TId>(rootFolderName, null, null);
+            RootFolder = new ComponentFolder<TId, ComponentDisplayMetadata>(new ComponentDisplayMetadata(rootFolderName, null, null));
 
             AppFolderUtils folderUtils = new AppFolderUtils(locationUnderProgramData);
             string fullBasePath = folderUtils.FullBasePath;
@@ -55,12 +55,10 @@ namespace NP.Concepts.ComponentFolders
                         string shortName = datumAssemblyAttribute.DisplayName ??
                             assembly.Location.SubstrFromTo("\\", ".", false);
 
-                        ComponentFolder<TId> subFolder =
+                        ComponentFolder<TId, ComponentDisplayMetadata> subFolder =
                             RootFolder.GetOrAddFolder
                             (
-                                shortName,
-                                datumAssemblyAttribute.Icon,
-                                datumAssemblyAttribute.Description);
+                                new ComponentDisplayMetadata(shortName, datumAssemblyAttribute.Icon, datumAssemblyAttribute.Description));
 
                         foreach (Type typeFromAssembly in assembly.DefinedTypes)
                         {
@@ -81,9 +79,11 @@ namespace NP.Concepts.ComponentFolders
 
                                 bbId.AddDisplayMetaData
                                 (
-                                    datumProcessorAttribute.Icon,
-                                    shortName,
-                                    datumProcessorAttribute.Description);
+                                    new ComponentDisplayMetadata
+                                    (
+                                        shortName,
+                                        datumProcessorAttribute.Icon,
+                                        datumProcessorAttribute.Description));
 
                                 subFolder.Add(bbId);
                             }
