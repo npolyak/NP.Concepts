@@ -5,11 +5,12 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Security.Cryptography;
 
 namespace NP.Concepts.ComponentFolders
 {
-    public class ComponentFolder<TId, TMetaData> : IComponentMetaDataContainer<TMetaData>, INotifyPropertyChanged
+    public class ComponentFolder<TId, TMetaData> : 
+        IComponentMetaDataContainer<TMetaData>, 
+        INotifyPropertyChanged
         where TId : INameContainer
         where TMetaData : class, IComponentDisplayMetadata
     {

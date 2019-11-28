@@ -55,7 +55,7 @@ namespace NP.Concepts
         public event Action IsComponentChangedEvent;
 
         public bool CanSave => SaveableRestorable.CanSave && 
-                             (CurrentItemInfo?.ItemName.IsNullOrWhiteSpace() == false);
+                             (this.ItemName.IsNullOrWhiteSpace() == false);
 
         // this is the assembly info that is specified
         // by the name within the text box. 
@@ -98,6 +98,14 @@ namespace NP.Concepts
 
             this.PropertyChanged +=
                 CustomItemsManager_PropertyChanged;
+
+            TheNamedItemInfo.PropertyChanged +=
+                TheNamedItemInfo_PropertyChanged;
+        }
+
+        private void TheNamedItemInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(CanSave));
         }
 
         private void CustomItemsManager_PropertyChanged
@@ -145,7 +153,6 @@ namespace NP.Concepts
                 FireIsComponentChanged();
 
                 this.OnPropertyChanged(nameof(CurrentItemInfo));
-                OnPropertyChanged(nameof(CanSave));
             }
         }
 
@@ -196,7 +203,7 @@ namespace NP.Concepts
         }
 
 
-        public void SaveListOfItems()
+        private void SaveListOfItems()
         {
             if (ItemName.IsNullOrWhiteSpace())
                 return;
@@ -225,6 +232,8 @@ namespace NP.Concepts
             TheItemSaverRestorer.Save(SaveableRestorable, ItemName);
 
             SaveListOfItems();
+            
+            OnPropertyChanged(nameof(CanSave));
 
             SaveItemEvent?.Invoke();
         }

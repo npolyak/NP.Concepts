@@ -79,6 +79,7 @@
     <Compile Include="ComponentFolders\ComponentIdWithDisplayMetadata.cs" />
     <Compile Include="ComponentFolders\ComponentLoader.cs" />
     <Compile Include="ComponentFolders\IComponentMetaDataContainer.cs" />
+    <Compile Include="IdContainer.cs" />
     <Compile Include="ICircularArrangedItem.cs" />
     <Compile Include="CodeBuilder.cs" />
     <Compile Include="CodeUtils.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="TypeUtils.cs" />
     <Compile Include="ValueHolder.cs" />
     <Compile Include="VMBase.cs" />
+    <Compile Include="XamlResourceInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)NP.Utilities\NP.Utilities.csproj">

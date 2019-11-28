@@ -1,4 +1,6 @@
-﻿namespace NP.Concepts.ComponentFolders
+﻿using NP.Utilities;
+
+namespace NP.Concepts.ComponentFolders
 {
     public interface IComponentDisplayMetadata
     {
@@ -54,6 +56,23 @@
                 componentDisplayMetadata.Description)
         {
 
+        }
+    }
+
+    public static class ComponentDisplayMetadataExtensions
+    {
+        public static string GetShortName
+        (
+            this IComponentDisplayMetadata componentDisplayMetadata, 
+            string path, 
+            string startSeparator,
+            string endSeparator = null)
+        {
+            string shortName = 
+                componentDisplayMetadata.DisplayName ??
+                        path.SubstrFromTo(startSeparator, endSeparator, false);
+
+            return shortName;
         }
     }
 }
