@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace NP.Concepts.Expressions
@@ -187,6 +188,37 @@ namespace NP.Concepts.Expressions
             return result;
         }
 
+
+        static DoubleParamMap<Type, string, Action<object>> _untypedNoArgsCache =
+            new DoubleParamMap<Type, string, Action<object>>();
+
+        public static Action<object> GetUntypedVoidNoArgsMethodByObjType
+        (
+            this Type objType, 
+            string methodName
+        )
+        {
+            Action<object> result;
+            if (_untypedNoArgsCache.TryGetValue(objType, methodName, out result))
+            {
+                return result;
+            }
+
+            MethodInfo methodInfo = objType.GetMethod(methodName);
+
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(object), "obj");
+
+            Expression convertExpression =
+                Expression.Convert(parameterExpression, objType);
+
+            Expression callExpression = Expression.Call(convertExpression, methodInfo);
+
+            result = Expression.Lambda<Action<object>>(callExpression, parameterExpression).Compile();
+
+            _untypedNoArgsCache.AddKeyValue(objType, methodName, result);
+
+            return result;
+        }
 
         static DoubleParamMap<Type, string, object> _typedSettersCache =
             new DoubleParamMap<Type, string, object>();

@@ -1,19 +1,25 @@
 ﻿using NP.Utilities.BasicInterfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace NP.Concepts.ComponentFolders
 {
-    public class ComponentLoader<TId, TMetaData, TAssemblyAttribute, TClassAttribute>
+    public class ComponentLoader<TId, TMetaData, TAssemblyAttribute>
         where TId : INameContainer
         where TMetaData : class, IComponentDisplayMetadata
         where TAssemblyAttribute : Attribute, TMetaData
-        where TClassAttribute : Attribute, TMetaData
     {
         public ComponentFolder<TId, TMetaData> RootFolder { get; }
 
         public Func<Type, TId> IdFactory { get; }
+
+        private Func<Assembly, TAssemblyAttribute, TMetaData> _folderMetadataFactory;
+        private string _locationUnderProgramData;
+        Func<Assembly, IEnumerable<(Type, TMetaData)>> _typeAndMetadataGetter;
+        Func<Type, TMetaData, TMetaData> _componentMetaDataFactory;
 
         public ComponentLoader
         (
@@ -21,30 +27,43 @@ namespace NP.Concepts.ComponentFolders
             Func<Type, TId> idFactory,
             TMetaData rootFolderMetaData,
             Func<Assembly, TAssemblyAttribute, TMetaData> folderMetadataFactory,
-            Func<Type, TClassAttribute, TMetaData> componentMetaDataFactory)
+            Func<Assembly, IEnumerable<(Type, TMetaData)>> typeAndMetadataGetter,
+            Func<Type, TMetaData, TMetaData> componentMetaDataFactory)
         {
+            _locationUnderProgramData = locationUnderProgramData;
+
             IdFactory = idFactory;
 
             RootFolder =
                 new ComponentFolder<TId, TMetaData>(rootFolderMetaData);
 
-            foreach(Assembly assembly in locationUnderProgramData.LoadComponentDlls<TAssemblyAttribute>())
+            _folderMetadataFactory = folderMetadataFactory;
+
+            _typeAndMetadataGetter = typeAndMetadataGetter;
+            _componentMetaDataFactory = componentMetaDataFactory;
+        }
+
+        public void Load<TComponentIdWithDisplayMetadata>()
+            where TComponentIdWithDisplayMetadata : IComponentIdWithDisplayMetadata<TId, TMetaData>
+        {
+            foreach (Assembly assembly in _locationUnderProgramData.LoadComponentDlls<TAssemblyAttribute>())
             {
                 TAssemblyAttribute loadedAssemblyAttribute =
                     assembly.GetCustomAttributes<TAssemblyAttribute>().FirstOrDefault();
 
                 ComponentFolder<TId, TMetaData> subFolder =
-                    RootFolder.GetOrAddFolder(folderMetadataFactory(assembly, loadedAssemblyAttribute));
+                    RootFolder.GetOrAddFolder(_folderMetadataFactory(assembly, loadedAssemblyAttribute));
 
-                foreach ((Type typeFromAssembly, TClassAttribute typeProcessorAttribute) in assembly.GetAttributedTypes<TClassAttribute>())
+                foreach ((Type typeFromAssembly, TMetaData typeProcessorAttribute) in _typeAndMetadataGetter(assembly))
                 {
                     TId bbId = IdFactory(typeFromAssembly);
 
-                    bbId.AddDisplayMetaData<TId, TMetaData>
-                    (
-                        componentMetaDataFactory(typeFromAssembly, typeProcessorAttribute));
+                    TMetaData metaData =  _componentMetaDataFactory(typeFromAssembly, typeProcessorAttribute);
 
-                    subFolder.Add(bbId);
+                    TComponentIdWithDisplayMetadata componentInfo =
+                        (TComponentIdWithDisplayMetadata) Activator.CreateInstance(typeof(TComponentIdWithDisplayMetadata), bbId, metaData);
+
+                    subFolder.Add(componentInfo);
                 }
             }
         }

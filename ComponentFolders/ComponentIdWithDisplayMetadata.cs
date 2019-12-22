@@ -6,10 +6,17 @@ using System.ComponentModel;
 
 namespace NP.Concepts.ComponentFolders
 {
-    public class ComponentIdWithDisplayMetadata<TId, TMetaData> :  
-        IMatchable,
+    public interface IComponentIdWithDisplayMetadata<TId, TMetaData> :
         IComponentMetaDataContainer<TMetaData>,
         INotifyPropertyChanged
+        where TId : INameContainer
+        where TMetaData : class, IComponentDisplayMetadata
+    {
+        TId TheComponentId { get; }
+    }
+
+    public class ComponentIdWithDisplayMetadata<TId, TMetaData> :  
+        IComponentIdWithDisplayMetadata<TId, TMetaData>
         where TId : INameContainer
         where TMetaData : class, IComponentDisplayMetadata
     {
@@ -39,10 +46,10 @@ namespace NP.Concepts.ComponentFolders
             }
         }
 
-        public ComponentIdWithDisplayMetadata(TId componentId)
+        public ComponentIdWithDisplayMetadata(TId componentId, TMetaData metaData)
         {
-            MetaData = componentId.GetDisplayMetadata<TId, TMetaData>();
             TheComponentId = componentId;
+            MetaData = metaData;
         }
 
         public void CheckMatching(string str)
@@ -70,11 +77,11 @@ namespace NP.Concepts.ComponentFolders
         }
 
 
-        public static TMetaData GetDisplayMetadata<TId, TMetaData>(this TId componentId) 
+        public static TMetaData GetDisplayMetadata<TId, TMetaData>(this TId componentId)
             where TId : INameContainer
             where TMetaData : class, IComponentDisplayMetadata
         {
-            if ( ComponentIdWithDisplayMetadata<TId, TMetaData>.MetadataMap.TryGetValue
+            if (ComponentIdWithDisplayMetadata<TId, TMetaData>.MetadataMap.TryGetValue
                  (
                      componentId,
                      out TMetaData md))
