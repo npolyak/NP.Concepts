@@ -68,7 +68,7 @@ namespace NP.Concepts
 
         public override string ToString()
         {
-            return ItemName;
+            return ItemName ?? "Default Item";
         }
 
         public void CopyFrom(SaveableItemInfo layoutInfo)

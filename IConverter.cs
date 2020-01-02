@@ -1,6 +1,6 @@
 ﻿namespace NP.Concepts
 {
-    public interface IConverter<TIn, TOut>
+    public interface IConverter<in TIn, out TOut>
     {
         TOut Convert(TIn val);
     }
