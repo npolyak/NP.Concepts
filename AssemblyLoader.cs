@@ -13,6 +13,8 @@ namespace NP.Concepts
         static Dictionary<string, object> _locationsToLoadAssembliesFrom = new Dictionary<string, object>();
 
         private static Dictionary<Type, object> _assemblyAttrTypes = new Dictionary<Type, object>();
+        private static MetadataLoadContext TheMetadataLoadContext;
+
 
         public static void AddAssemblyAttrType(this Type assemblyAttrType)
         {
@@ -94,6 +96,19 @@ namespace NP.Concepts
             Init();
         }
 
+        private static IEnumerable<string> GetPluginFilePaths(this IEnumerable<string> dirs)
+        {
+            return dirs.Select(dirName =>
+            {
+                string localDirName = dirName.SubstrFromTo("\\", null, false);
+
+                string filePath = $"{dirName}\\{localDirName}.dll";
+
+                return filePath;
+            })
+            .Where(filePath => File.Exists(filePath));
+        }
+
         public static IEnumerable<Assembly>
             LoadComponentDlls<TLoadAssemblyAttribute>(this string locationUnderProgramData)
             where TLoadAssemblyAttribute : Attribute
@@ -104,28 +119,56 @@ namespace NP.Concepts
             string fullBasePath = folderUtils.FullBasePath;
 
             var dirs = Directory.EnumerateDirectories(fullBasePath);
-            foreach (string dirName in dirs)
+
+            List<string> pluginFilePaths = dirs.GetPluginFilePaths().ToList();
+
+            //TheMetadataLoadContext = new MetadataLoadContext(new PathAssemblyResolver(pluginFilePaths));
+
+            foreach(var filePath in pluginFilePaths)
             {
-                string localDirName = dirName.SubstrFromTo("\\", null, false);
+                //Assembly assembly = 
+                //    TheMetadataLoadContext.LoadFromAssemblyPath(filePath);
 
-                string filePath = $"{dirName}\\{localDirName}.dll";
+                //CustomAttributeData loadAssemblyAttributeData =
+                //        assembly.GetCustomAttributesData()
+                //                .FirstOrDefault(attrData => attrData.AttributeType.FullName == typeof(TLoadAssemblyAttribute).FullName);
 
-                if (File.Exists(filePath))
+               // if (loadAssemblyAttributeData != null)
                 {
-                    Assembly assembly = Assembly.ReflectionOnlyLoadFrom(filePath);
+                    Assembly assembly = Assembly.LoadFile(filePath);
 
-                    CustomAttributeData loadAssemblyAttributeData =
-                        assembly.GetCustomAttributesData()
-                                .FirstOrDefault(attrData => attrData.AttributeType.FullName == typeof(TLoadAssemblyAttribute).FullName);
-
-                    if (loadAssemblyAttributeData != null)
+                    if (assembly.GetCustomAttributesData()
+                                .Any(attrData => attrData.AttributeType.FullName == typeof(TLoadAssemblyAttribute).FullName))
                     {
-                        assembly = Assembly.LoadFile(filePath);
-
                         yield return assembly;
                     }
+
+                    yield return assembly;
                 }
             }
+
+            //foreach (string dirName in dirs)
+            //{
+            //    string localDirName = dirName.SubstrFromTo("\\", null, false);
+
+            //    string filePath = $"{dirName}\\{localDirName}.dll";
+
+            //    if (File.Exists(filePath))
+            //    {
+            //        Assembly assembly = Assembly.ReflectionOnlyLoadFrom(filePath);
+
+            //        CustomAttributeData loadAssemblyAttributeData =
+            //            assembly.GetCustomAttributesData()
+            //                    .FirstOrDefault(attrData => attrData.AttributeType.FullName == typeof(TLoadAssemblyAttribute).FullName);
+
+            //        if (loadAssemblyAttributeData != null)
+            //        {
+            //            assembly = Assembly.LoadFile(filePath);
+
+            //            yield return assembly;
+            //        }
+            //    }
+            //}
         }
 
         public static IEnumerable<(Type type, TClassAttribute classAttr)> GetAttributedTypes<TClassAttribute>(this Assembly assembly)
