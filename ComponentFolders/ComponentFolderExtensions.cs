@@ -7,42 +7,46 @@ namespace NP.Concepts.ComponentFolders
 {
     public static class ComponentFolderExtensions
     {
-        private static IEnumerable<IComponentMetaDataContainer<TMetaData>> ToChildren<TId, TMetaData>(this IComponentMetaDataContainer<TMetaData> componentDisplayMetadata)
+        private static IEnumerable<IComponentMetaDataContainer> ToChildren<TId, TFolderMetaData, TComponentMetaData>(this IComponentMetaDataContainer componentDisplayMetadata)
             where TId : INameContainer
-            where TMetaData : class, IComponentDisplayMetadata
+            where TFolderMetaData : class, IComponentDisplayMetadata
+            where TComponentMetaData : class, IComponentDisplayMetadata
         {
-            if (componentDisplayMetadata is ComponentFolder<TId, TMetaData> componentFolder)
+            if (componentDisplayMetadata is ComponentFolder<TId, TFolderMetaData, TComponentMetaData> componentFolder)
             {
                 return componentFolder.FoldersAndComponents;
             }
 
-            return Enumerable.Empty<IComponentMetaDataContainer<TMetaData>>();
+            return Enumerable.Empty<IComponentMetaDataContainer>();
         }
 
-        public static IEnumerable<IComponentIdWithDisplayMetadata<TId, TMetaData>> GetAllNonFolderComponents<TId, TMetaData>(this IComponentMetaDataContainer<TMetaData> folder)
+        public static IEnumerable<IComponentIdWithDisplayMetadata<TId, TComponentMetaData>> GetAllNonFolderComponents<TId, TFolderMetaData, TComponentMetaData>(this ComponentFolder<TId, TFolderMetaData, TComponentMetaData> folder)
             where TId : INameContainer
-            where TMetaData : class, IComponentDisplayMetadata 
+            where TFolderMetaData : class, IComponentDisplayMetadata
+            where TComponentMetaData : class, IComponentDisplayMetadata
         {
-            return folder.Descendants <IComponentMetaDataContainer<TMetaData>, IComponentIdWithDisplayMetadata<TId, TMetaData>> (ToChildren<TId, TMetaData>);
+            return folder.Descendants<IComponentMetaDataContainer, IComponentIdWithDisplayMetadata<TId, TComponentMetaData>> (ToChildren<TId, TFolderMetaData, TComponentMetaData>);
         }
 
-        public static (ComponentFolder<TId, TMetaData> componentFolder, IComponentIdWithDisplayMetadata<TId, TMetaData> componentIdWithDisplayMetadata)
-            GetItemAndContainingFolder<TId, TMetaData>(this ComponentFolder<TId, TMetaData> folder, string componentName)
+        public static (ComponentFolder<TId, TFolderMetaData, TComponentMetaData> componentFolder, IComponentIdWithDisplayMetadata<TId, TComponentMetaData> componentIdWithDisplayMetadata)
+            GetItemAndContainingFolder<TId, TFolderMetaData, TComponentMetaData>(this ComponentFolder<TId, TFolderMetaData, TComponentMetaData> folder, string componentName)
             where TId : INameContainer
-            where TMetaData : class, IComponentDisplayMetadata
+            where TFolderMetaData : class, IComponentDisplayMetadata
+            where TComponentMetaData : class, IComponentDisplayMetadata
         {
-            TreeNodeInfo<IComponentMetaDataContainer<TMetaData>> treeNodeInfo =
-                folder.SelfAndDescendantsWithLevelInfo<IComponentMetaDataContainer<TMetaData>>(null, ToChildren<TId, TMetaData>)
-                    .FirstOrDefault(item => item.Node is IComponentIdWithDisplayMetadata<TId, TMetaData> compId && compId.TheComponentId.Name == componentName);
+            TreeNodeInfo<IComponentMetaDataContainer> treeNodeInfo =
+                folder.SelfAndDescendantsWithLevelInfo<IComponentMetaDataContainer>(null, ToChildren<TId, TFolderMetaData, TComponentMetaData >)
+                    .FirstOrDefault(item => item.Node is IComponentIdWithDisplayMetadata<TId, TComponentMetaData> compId && compId.TheComponentId.Name == componentName);
 
-            return (treeNodeInfo?.Parent as ComponentFolder<TId, TMetaData>, treeNodeInfo?.Node as IComponentIdWithDisplayMetadata<TId, TMetaData>);
+            return (treeNodeInfo?.Parent as ComponentFolder<TId, TFolderMetaData, TComponentMetaData>, treeNodeInfo?.Node as IComponentIdWithDisplayMetadata<TId, TComponentMetaData>);
         }
 
-        public static void RemoveDescendantNodeByName<TId, TMetaData>(this ComponentFolder<TId, TMetaData> folder, string bbName)
+        public static void RemoveDescendantNodeByName<TId, TFolderMetaData, TComponentMetaData>(this ComponentFolder<TId, TFolderMetaData, TComponentMetaData> folder, string bbName)
             where TId : INameContainer
-            where TMetaData : class, IComponentDisplayMetadata
+            where TFolderMetaData : class, IComponentDisplayMetadata
+            where TComponentMetaData : class, IComponentDisplayMetadata
         {
-            (ComponentFolder<TId, TMetaData> bbFolder, IComponentIdWithDisplayMetadata<TId, TMetaData> bbIdWithDisplayMetadata) =
+            (ComponentFolder<TId, TFolderMetaData, TComponentMetaData> bbFolder, IComponentIdWithDisplayMetadata<TId, TComponentMetaData> bbIdWithDisplayMetadata) =
                 folder.GetItemAndContainingFolder(bbName);
 
             if (bbIdWithDisplayMetadata != null)

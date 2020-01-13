@@ -13,6 +13,12 @@ namespace NP.Concepts
             ResourceKey = resourceKey;
         }
 
+        // copy
+        public XamlResourceInfo(XamlResourceInfo xamlResourceInfo) : 
+            this(xamlResourceInfo.ResourceDictionaryUrl, xamlResourceInfo.ResourceKey)
+        {
+        }
+
         public bool IsValid =>
             (!ResourceDictionaryUrl.IsNullOrEmpty()) && 
             (!ResourceKey.IsNullOrEmptyCollection());

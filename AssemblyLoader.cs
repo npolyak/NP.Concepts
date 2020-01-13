@@ -110,8 +110,7 @@ namespace NP.Concepts
         }
 
         public static IEnumerable<Assembly>
-            LoadComponentDlls<TLoadAssemblyAttribute>(this string locationUnderProgramData)
-            where TLoadAssemblyAttribute : Attribute
+            LoadComponentDlls(this string locationUnderProgramData, Type assemblyAttributeType)
         {
             AppFolderUtils folderUtils =
                 new AppFolderUtils(locationUnderProgramData);
@@ -138,13 +137,21 @@ namespace NP.Concepts
                     Assembly assembly = Assembly.LoadFile(filePath);
 
                     if (assembly.GetCustomAttributesData()
-                                .Any(attrData => attrData.AttributeType.FullName == typeof(TLoadAssemblyAttribute).FullName))
+                                .Any(attrData => attrData.AttributeType.FullName == assemblyAttributeType.FullName))
                     {
                         yield return assembly;
                     }
                 }
             }
         }
+
+        public static IEnumerable<Assembly>
+            LoadComponentDlls<TAssemblyAttribute>(this string locationUnderProgramData)
+            where TAssemblyAttribute : Attribute
+        {
+            return locationUnderProgramData.LoadComponentDlls(typeof(TAssemblyAttribute));
+        }
+
 
         public static IEnumerable<(Type type, TClassAttribute classAttr)> GetAttributedTypes<TClassAttribute>(this Assembly assembly)
             where TClassAttribute : Attribute

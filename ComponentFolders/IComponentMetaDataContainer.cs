@@ -1,14 +1,19 @@
 ﻿namespace NP.Concepts.ComponentFolders
 {
-    public interface IComponentMetaDataContainer<TMetaData>
-        where TMetaData : IComponentDisplayMetadata
+    public interface IComponentMetaDataContainer
     {
         bool IsFolder { get; }
-
-        TMetaData MetaData { get; }
 
         bool IsMatching { get; }
 
         void CheckMatching(string strToMatch);
+    }
+
+    public interface IComponentMetaDataContainer<TMetaData> : 
+        IComponentMetaDataContainer
+        where TMetaData : IComponentDisplayMetadata
+    {
+
+        TMetaData MetaData { get; }
     }
 }

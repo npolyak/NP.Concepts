@@ -8,53 +8,54 @@ using System.Linq;
 
 namespace NP.Concepts.ComponentFolders
 {
-    public class ComponentFolder<TId, TMetaData> : 
-        IComponentMetaDataContainer<TMetaData>, 
+    public class ComponentFolder<TId, TFolderMetaData, TComponentMetaData> : 
+        IComponentMetaDataContainer<TFolderMetaData>, 
         INotifyPropertyChanged
         where TId : INameContainer
-        where TMetaData : class, IComponentDisplayMetadata
+        where TFolderMetaData : class, IComponentDisplayMetadata
+        where TComponentMetaData : class, IComponentDisplayMetadata
     {
         public bool IsFolder => true;
 
-        public TMetaData MetaData { get; }
+        public TFolderMetaData MetaData { get; }
 
-        public ObservableCollection<ComponentFolder<TId, TMetaData>> SubFolders { get; } =
-            new ObservableCollection<ComponentFolder<TId, TMetaData>>();
+        public ObservableCollection<ComponentFolder<TId, TFolderMetaData, TComponentMetaData>> SubFolders { get; } =
+            new ObservableCollection<ComponentFolder<TId, TFolderMetaData, TComponentMetaData>>();
 
-        public ObservableCollection<IComponentIdWithDisplayMetadata<TId, TMetaData>> ComponentInfos { get; } =
-            new ObservableCollection<IComponentIdWithDisplayMetadata<TId, TMetaData>>();
+        public ObservableCollection<IComponentIdWithDisplayMetadata<TId, TComponentMetaData>> ComponentInfos { get; } =
+            new ObservableCollection<IComponentIdWithDisplayMetadata<TId, TComponentMetaData>>();
 
-        public ObservableCollection<IComponentMetaDataContainer<TMetaData>> FoldersAndComponents { get; } =
-            new ObservableCollection<IComponentMetaDataContainer<TMetaData>>();
+        public ObservableCollection<IComponentMetaDataContainer> FoldersAndComponents { get; } =
+            new ObservableCollection<IComponentMetaDataContainer>();
 
-        public ComponentFolder<TId, TMetaData> FindSubFolder(string subFolderName)
+        public ComponentFolder<TId, TFolderMetaData, TComponentMetaData> FindSubFolder(string subFolderName)
         {
             return SubFolders
                        .FirstOrDefault(f => f.MetaData.DisplayName == subFolderName);
         }
 
-        public void Add(IComponentIdWithDisplayMetadata<TId, TMetaData> componentInfo)
+        public void Add(IComponentIdWithDisplayMetadata<TId, TComponentMetaData> componentInfo)
         {
             ComponentInfos.Add(componentInfo);
         }
 
-        public ComponentFolder<TId, TMetaData>
-            AddSubFolder(TMetaData subFolderMetaData)
+        public ComponentFolder<TId, TFolderMetaData, TComponentMetaData>
+            AddSubFolder(TFolderMetaData subFolderMetaData)
         {
-            ComponentFolder<TId, TMetaData> subFolder =
-                new ComponentFolder<TId, TMetaData>(subFolderMetaData);
+            ComponentFolder<TId, TFolderMetaData, TComponentMetaData> subFolder =
+                new ComponentFolder<TId, TFolderMetaData, TComponentMetaData>(subFolderMetaData);
 
             SubFolders.Add(subFolder);
 
             return subFolder;
         }
 
-        public ComponentFolder<TId, TMetaData> GetOrAddFolder
+        public ComponentFolder<TId, TFolderMetaData, TComponentMetaData> GetOrAddFolder
         (
-            TMetaData subFolderMetaData    
+            TFolderMetaData subFolderMetaData    
         )
         {
-            ComponentFolder<TId, TMetaData> subFolder =
+            ComponentFolder<TId, TFolderMetaData, TComponentMetaData> subFolder =
                 FindSubFolder(subFolderMetaData.DisplayName) ?? AddSubFolder(subFolderMetaData);
 
             return subFolder;
@@ -90,7 +91,9 @@ namespace NP.Concepts.ComponentFolders
                 this._searchStr = value;
                 this.OnPropertyChanged(nameof(SearchStr));
 
-                var allComponents = this.GetAllNonFolderComponents<TId, TMetaData>().ToList();
+                var allComponents = 
+                    this.GetAllNonFolderComponents<TId, TFolderMetaData, TComponentMetaData>().ToList();
+                
                 foreach (var descendant in allComponents)
                 {
                     if (!descendant.IsFolder)
@@ -105,7 +108,7 @@ namespace NP.Concepts.ComponentFolders
 
         public ComponentFolder
         (
-            TMetaData metaData
+            TFolderMetaData metaData
         )
         {
             MetaData = metaData;
@@ -113,24 +116,24 @@ namespace NP.Concepts.ComponentFolders
             _bbsBehavior = ComponentInfos.AddBehavior(OnAddComponentItem, OnRemoveComponentItem);
         }
 
-        private void OnAddComponentItem(IComponentIdWithDisplayMetadata<TId, TMetaData> componentItem)
+        private void OnAddComponentItem(IComponentIdWithDisplayMetadata<TId, TComponentMetaData> componentItem)
         {
             FoldersAndComponents.Add(componentItem);
         }
 
-        private void OnRemoveComponentItem(IComponentIdWithDisplayMetadata<TId, TMetaData> componentItem)
+        private void OnRemoveComponentItem(IComponentIdWithDisplayMetadata<TId, TComponentMetaData> componentItem)
         {
             FoldersAndComponents.Add(componentItem);
         }
 
-        private void OnAddSubFolderItem(IComponentMetaDataContainer<TMetaData> folderItem)
+        private void OnAddSubFolderItem(IComponentMetaDataContainer<TFolderMetaData> folderItem)
         {
             int lastFolderIdx = FoldersAndComponents.LastIndexOf(md => md.IsFolder);
 
             FoldersAndComponents.Insert(lastFolderIdx + 1, folderItem);
         }
 
-        private void OnRemoveSubFolderItem(IComponentMetaDataContainer<TMetaData> folderItem)
+        private void OnRemoveSubFolderItem(IComponentMetaDataContainer<TFolderMetaData> folderItem)
         {
             FoldersAndComponents.Remove(folderItem);
         }
