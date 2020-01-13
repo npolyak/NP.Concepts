@@ -142,33 +142,8 @@ namespace NP.Concepts
                     {
                         yield return assembly;
                     }
-
-                    yield return assembly;
                 }
             }
-
-            //foreach (string dirName in dirs)
-            //{
-            //    string localDirName = dirName.SubstrFromTo("\\", null, false);
-
-            //    string filePath = $"{dirName}\\{localDirName}.dll";
-
-            //    if (File.Exists(filePath))
-            //    {
-            //        Assembly assembly = Assembly.ReflectionOnlyLoadFrom(filePath);
-
-            //        CustomAttributeData loadAssemblyAttributeData =
-            //            assembly.GetCustomAttributesData()
-            //                    .FirstOrDefault(attrData => attrData.AttributeType.FullName == typeof(TLoadAssemblyAttribute).FullName);
-
-            //        if (loadAssemblyAttributeData != null)
-            //        {
-            //            assembly = Assembly.LoadFile(filePath);
-
-            //            yield return assembly;
-            //        }
-            //    }
-            //}
         }
 
         public static IEnumerable<(Type type, TClassAttribute classAttr)> GetAttributedTypes<TClassAttribute>(this Assembly assembly)

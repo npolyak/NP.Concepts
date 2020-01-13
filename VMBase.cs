@@ -3,7 +3,12 @@ using System.ComponentModel;
 
 namespace NP.Concepts
 {
-    public class VMBase : INotifyPropertyChanged
+    public interface IVMBase : INotifyPropertyChanged
+    {
+        void OnPropertyChanged(string propertyName);
+    }
+
+    public class VMBase : IVMBase
     {
 
         #region INotifyPropertyChanged Members
@@ -12,6 +17,11 @@ namespace NP.Concepts
         #endregion
 
         protected void OnPropertyChanged(string propertyName)
+        {
+            (this as IVMBase).OnPropertyChanged(propertyName);
+        }
+
+        void IVMBase.OnPropertyChanged(string propertyName)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
