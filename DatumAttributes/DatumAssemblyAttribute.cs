@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NP.Concepts.DatumAttributes.Attributes
+namespace NP.Concepts.DatumAttributes
 {
     [AttributeUsage(AttributeTargets.Assembly)]
     public class DatumAssemblyAttribute : ComponentMetadataAttributeBase

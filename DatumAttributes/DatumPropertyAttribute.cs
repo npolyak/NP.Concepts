@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NP.Concepts.DatumAttributes.Attributes
+namespace NP.Concepts.DatumAttributes
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class DatumPropertyAttribute : Attribute

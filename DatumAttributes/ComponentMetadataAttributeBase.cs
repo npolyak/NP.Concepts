@@ -1,7 +1,7 @@
 ﻿using NP.Concepts.ComponentFolders;
 using System;
 
-namespace NP.Concepts.DatumAttributes.Attributes
+namespace NP.Concepts.DatumAttributes
 {
     public class ComponentMetadataAttributeBase : Attribute, IComponentDisplayMetadata
     {

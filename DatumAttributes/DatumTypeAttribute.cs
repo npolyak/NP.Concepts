@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace NP.Concepts.DatumAttributes.Attributes
+namespace NP.Concepts.DatumAttributes
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
     public class DatumTypeAttribute : Attribute
     {
     }

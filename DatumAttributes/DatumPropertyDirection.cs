@@ -1,4 +1,4 @@
-﻿namespace NP.Concepts.DatumAttributes.Attributes
+﻿namespace NP.Concepts.DatumAttributes
 {
     public enum DatumPropertyDirection
     {
