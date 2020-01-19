@@ -169,8 +169,6 @@ namespace NP.Concepts.Expressions
 
             UnaryExpression objCastExpression = Expression.Convert(objParamExpression, objType);
 
-            ParameterExpression inputParamExpression = Expression.Parameter(methodArgType, methodName);
-
             ParameterExpression valueParamExpression = Expression.Parameter(typeof(object));
             UnaryExpression valueCastExpression = Expression.Convert(valueParamExpression, methodArgType);
 
@@ -297,6 +295,99 @@ namespace NP.Concepts.Expressions
             ).Compile();
 
             _fullyTypedSettersCache.AddKeyValue(objType, propertyName, result);
+
+            return result;
+        }
+
+
+        public static (ParameterExpression[] methodObjParams, UnaryExpression[] methodCastParams) GetMethodParams(this MethodInfo methodInfo)
+        {
+            var paramPairs = methodInfo.GetParameters().Select(param =>
+            {
+                ParameterExpression objParam = Expression.Parameter(typeof(object), param.Name);
+                UnaryExpression castParam = Expression.Convert(objParam, param.ParameterType);
+
+                return new { ObjParam = objParam, CastParam = castParam };
+            }).ToList();
+
+            return (paramPairs.Select(pp => pp.ObjParam).ToArray(), paramPairs.Select(pp => pp.CastParam).ToArray());
+        }
+
+        public static Expression CreateArrayCellAccessExpression
+        (
+            this ParameterExpression arrayParameterExpression, // e.g.created by Expression.Parameter(typeof(object[]), "inputParams");
+            int cellIdx)
+        {
+            var cellToSet = Expression.Constant(cellIdx, typeof(int));
+
+            var arrayAccess = Expression.ArrayAccess(arrayParameterExpression, cellToSet);
+
+            return arrayAccess;
+        }
+
+        public static Expression CreateAssignArrayCellExpression
+        (
+            this ParameterExpression arrayParameterExpression, // e.g. created by Expression.Parameter(typeof(object[]), "inputParams"); 
+            int cellIdx, 
+            Expression exprToAssign)
+        {
+            var assignArrayCell =
+                Expression.Assign
+                (
+                    arrayParameterExpression.CreateArrayCellAccessExpression(cellIdx),
+                    exprToAssign);
+
+            return assignArrayCell;
+        }
+
+        public static Expression[] GetMethodParamSettersFromArray(this MethodInfo methodInfo, ParameterExpression arrayParams)
+        {
+            Expression[] paramSetters =
+                methodInfo.GetParameters().Select((param, idx) => Expression.Convert(arrayParams.CreateArrayCellAccessExpression(idx), param.ParameterType)).ToArray();
+
+            return paramSetters;
+        }
+
+        // basically for method MyMethod(int i, string str) return a body of the method that would pass
+        // the same params as an object array
+        // MyMethodCall(object[] inputParams)
+        // { 
+        //     MyMethod((int)inputParams[0], (string) inputParams[1]);
+        // }
+        public static MethodCallExpression GetMethodCallFromParamArray(this MethodInfo methodInfo, ParameterExpression inputParams)
+        {
+            Expression[] paramSetters =
+                methodInfo.GetParameters().Select((param, idx) => Expression.Convert(inputParams.CreateArrayCellAccessExpression(idx), param.ParameterType)).ToArray();
+
+            MethodCallExpression methodCallExpr = Expression.Call(methodInfo, paramSetters);
+
+            return methodCallExpr;
+        }
+
+        public static Action<object[]> GetParamArrayLambdaForVoidMethod(this MethodInfo methodInfo)
+        {
+            var array = Expression.Parameter(typeof(object[]), "inputParams");
+
+            MethodCallExpression methodCallExpr = methodInfo.GetMethodCallFromParamArray(array);
+
+            var resultExpr = Expression.Lambda<Action<object[]>>(methodCallExpr, array);
+
+            var result = resultExpr.Compile();
+
+            return result;
+        }
+
+        public static Func<object[], object> GetParamArrayLambdaForReturningMethod(this MethodInfo methodInfo)
+        {
+            var array = Expression.Parameter(typeof(object[]), "inputParams");
+
+            MethodCallExpression methodCallExpr = methodInfo.GetMethodCallFromParamArray(array);
+
+            var finalExpr = Expression.Convert(methodCallExpr, typeof(object));
+
+            var resultExpr = Expression.Lambda<Func<object[], object>>(finalExpr, array);
+
+            var result = resultExpr.Compile();
 
             return result;
         }

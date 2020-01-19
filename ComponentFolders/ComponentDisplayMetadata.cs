@@ -48,10 +48,10 @@ namespace NP.Concepts.ComponentFolders
             SetFrom(displayName, icon, description);
         }
 
-        public ComponentDisplayMetadata(IComponentDisplayMetadata componentDisplayMetadata) :
+        public ComponentDisplayMetadata(IComponentDisplayMetadata componentDisplayMetadata, string shortName) :
             this
             (
-                componentDisplayMetadata.DisplayName,
+                componentDisplayMetadata.DisplayName ?? shortName,
                 componentDisplayMetadata.Icon,
                 componentDisplayMetadata.Description)
         {

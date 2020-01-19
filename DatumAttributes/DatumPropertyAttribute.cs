@@ -2,12 +2,17 @@
 
 namespace NP.Concepts.DatumAttributes
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class DatumPropertyAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    public class DatumPropertyAttribute : Attribute, IDatumMember
     {
         public DatumPropertyDirection Direction { get; }
 
         public Type DatumType { get; }
+
+        /// <summary>
+        /// lists the names of properties or methods for which it triggers changed
+        /// </summary>
+        public string[] TriggersChange { get; }
 
         #region IN Props
         public bool IsSaveable { get; }
@@ -25,6 +30,7 @@ namespace NP.Concepts.DatumAttributes
             bool isSaveable = false, 
             bool propagateWhenConnected = true,
             bool isNotifiable = true,
+            string[] triggersChange = null,
             Type datumType = null)
         {
             Direction = datumDirection;
@@ -33,6 +39,8 @@ namespace NP.Concepts.DatumAttributes
 
             PropagateWhenConnected = propagateWhenConnected;
             IsNotifiable = isNotifiable;
+
+            TriggersChange = triggersChange;
 
             DatumType = datumType;
         }
