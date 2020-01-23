@@ -147,6 +147,8 @@ namespace NP.Concepts
                 {
                     this.TheNamedItemInfo.CopyFrom(_currentItemInfo);
 
+                    OnPropertyChanged(nameof(ItemName));
+
                     _currentItemInfo.PropertyChanged += _currentItemInfo_PropertyChanged;
                 }
 
