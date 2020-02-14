@@ -6,7 +6,7 @@ namespace NP.Concepts
 {
     public class ItemSaverRestorer
     {
-        public FolderSaverRestorer SaverRestorer { get; }
+        public ItemToFolderSaverRestorer SaverRestorer { get; }
 
         public string BaseDirName { get; }
 
@@ -43,7 +43,7 @@ namespace NP.Concepts
             FileExtension = fileExtension;
             ItemsDirName = itemsDirName;
 
-            SaverRestorer = new FolderSaverRestorer(BaseDirName);
+            SaverRestorer = new ItemToFolderSaverRestorer(BaseDirName);
         }
 
         public void Restore
@@ -56,6 +56,11 @@ namespace NP.Concepts
             string strToRestoreObjFrom =
                 SaverRestorer.RestoreStr(fileName, dirName);
 
+            if (objToRestore is IItemNameContainer itemNameContainer)
+            {
+                itemNameContainer.ItemName = itemName;
+            }
+
             objToRestore.Restore(strToRestoreObjFrom);
         }
 
@@ -67,11 +72,21 @@ namespace NP.Concepts
                 objToSave.Save();
 
             SaverRestorer.SaveStr(fileName, strToSave, dirName);
+
+            if (objToSave is ISaveable saveable)
+            {
+                saveable.OnSave(itemName);
+            }
         }
 
-        public void Delete(string itemName)
+        public void Delete(IStrSaveableRestorableClearable objToDelete, string itemName)
         {
             (var fileName, var dirName) = GetItemPath(itemName);
+
+            if (objToDelete is IDeletable deletable)
+            {
+                deletable.OnDelete(itemName);
+            }
 
             SaverRestorer.DeleteItem(fileName, dirName);
         }

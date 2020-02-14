@@ -19,6 +19,8 @@ namespace NP.Concepts
 {
     public class CodeBuilder
     {
+        public List<int> TheOffsets { get; private set; } = new List<int>();
+
         Stack<string> RegionStack { get; } = new Stack<string>();
 
         public const string OPEN_BLOCK_STR = "{";
@@ -44,6 +46,7 @@ namespace NP.Concepts
 
         public void Reset()
         {
+            TheOffsets = new List<int>();
             TheBuilder = new StringBuilder();
             Shift = 0;
             TheCurrentOffset = 0;
@@ -71,7 +74,13 @@ namespace NP.Concepts
         }
 
         bool ShouldAppendShift =>
-            (_lastChar == '\n') || IsAtStart;
+            ((_lastChar == '\n') || IsAtStart) && !CancelShift;
+
+        public bool CancelShift
+        {
+            get;
+            set;
+        } = false;
 
         void AddCharAsIs(char c)
         {
@@ -123,6 +132,11 @@ namespace NP.Concepts
         public void CloseStatement()
         {
             AddText(";");
+        }
+
+        public void AddOffset(int addToOffset)
+        {
+            TheOffsets.Add(TheCurrentOffset + addToOffset);
         }
 
         public void AddLine
@@ -200,7 +214,9 @@ namespace NP.Concepts
         (
             string className,
             Type baseType = null,
-            Func<Type, Type> genericArgToType = null
+            Func<Type, Type> genericArgToType = null,
+            bool isStatic = false,
+            bool isPartial = false
         )
         {
             string extentionString = string.Empty;
@@ -210,8 +226,12 @@ namespace NP.Concepts
                 extentionString = $" : {baseType.GetTypeStr(genericArgToType)}";
             }
 
+            string staticInsert = isStatic ? "static " : "";
+
+            string partialInsert = isPartial ? "partial " : "";
+
             // make it internal so that it won't nameclash with other assemblies
-            AddLine($"public class {className}{extentionString}");
+            AddLine($"public {staticInsert}{partialInsert}class {className}{extentionString}");
             Push();
         }
 
@@ -232,6 +252,17 @@ namespace NP.Concepts
                     paramNameConverter
                 )
             );
+            this.Push();
+        }
+
+        public void AddStaticMethodOpening
+        (
+            string methodName, 
+            IEnumerable<(Type ParamType, string ParamName)> paramInfos,
+            Type returnType = null
+        )
+        {
+            this.AddLine(CodeUtils.GetStaticMethodSignature(methodName, paramInfos, returnType));
             this.Push();
         }
 
@@ -266,14 +297,14 @@ namespace NP.Concepts
         public const string GETTER = "get";
         public const string SETTER = "set";
 
-        public virtual void AddPropGetter()
+        public virtual void AddPropGetter(bool addSemicolon = false)
         {
-            AddLine(GETTER);
+            AddLine(GETTER, addSemicolon);
         }
 
-        public virtual void AddPropSetter()
+        public virtual void AddPropSetter(bool addSemicolon = false)
         {
-            AddLine(SETTER);
+            AddLine(SETTER, addSemicolon);
         }
 
         public void OpenPropGetter()

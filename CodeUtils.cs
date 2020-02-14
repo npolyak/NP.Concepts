@@ -11,7 +11,9 @@
 
 using NP.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 
 namespace NP.Concepts
 {
@@ -106,6 +108,11 @@ namespace NP.Concepts
             return result;
         }
 
+        public static string GetParamStr(Type paramType, string paramName)
+        {
+            return $"{paramType.GetTypeName()} {paramName}";
+        }
+
         public static string GetEncapsulationStr(this MethodInfo methodInfo)
         {
             if (methodInfo.IsPrivate)
@@ -177,6 +184,18 @@ namespace NP.Concepts
             result += ")";
 
             return result;
+        }
+
+        public static string GetStaticMethodSignature
+        (
+            string methodName, 
+            IEnumerable<(Type ParamType, string ParamName)> paramInfos, 
+            Type returnType = null
+        )
+        {
+            string returnTypeName = returnType?.Name ?? "void";
+
+            return $"public static {returnTypeName} {methodName}({paramInfos.StrConcat(paramInfo => GetParamStr(paramInfo.ParamType, paramInfo.ParamName))})";
         }
 
         // 3 tabs - one for namespace, one for 

@@ -16,7 +16,7 @@ namespace NP.Concepts
 
         ItemSaverRestorer TheItemSaverRestorer { get; }
 
-        FolderSaverRestorer ListOfItemsSaverRestorer =>
+        ItemToFolderSaverRestorer ListOfItemsSaverRestorer =>
             TheItemSaverRestorer.SaverRestorer;
 
         IStrSaveableRestorableClearable _saveableRestorable;
@@ -54,7 +54,7 @@ namespace NP.Concepts
 
         public event Action IsComponentChangedEvent;
 
-        public bool CanSave => SaveableRestorable.CanSave && 
+        public bool CanSave => (SaveableRestorable?.CanSave == true) && 
                              (this.ItemName.IsNullOrWhiteSpace() == false);
 
         // this is the assembly info that is specified
@@ -233,11 +233,11 @@ namespace NP.Concepts
         {
             TheItemSaverRestorer.Save(SaveableRestorable, ItemName);
 
+            SaveItemEvent?.Invoke();
+
             SaveListOfItems();
             
             OnPropertyChanged(nameof(CanSave));
-
-            SaveItemEvent?.Invoke();
         }
 
         public void RestoreItem()
@@ -264,6 +264,8 @@ namespace NP.Concepts
         {
             string itemName = ItemName;
 
+            TheItemSaverRestorer.Delete(SaveableRestorable, itemName);
+
             ClearItemAndName();
 
             SaveableItemInfo matchingItemInfo = GetMatchingItemInfo(itemName);
@@ -273,9 +275,6 @@ namespace NP.Concepts
                 this.TheItemsInfos.Remove(matchingItemInfo);
                 Serialize();
             }
-
-            TheItemSaverRestorer.Delete(itemName);
-
             this?.DeleteItemEvent?.Invoke(itemName);
         }
     }

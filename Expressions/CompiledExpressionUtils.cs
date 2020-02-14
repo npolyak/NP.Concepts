@@ -354,10 +354,20 @@ namespace NP.Concepts.Expressions
         // { 
         //     MyMethod((int)inputParams[0], (string) inputParams[1]);
         // }
-        public static MethodCallExpression GetMethodCallFromParamArray(this MethodInfo methodInfo, ParameterExpression inputParams)
+        public static MethodCallExpression GetMethodCallFromParamArray
+        (
+            this MethodInfo methodInfo, 
+            ParameterExpression inputParams)
         {
             Expression[] paramSetters =
-                methodInfo.GetParameters().Select((param, idx) => Expression.Convert(inputParams.CreateArrayCellAccessExpression(idx), param.ParameterType)).ToArray();
+                methodInfo.GetParameters()
+                            .Select
+                            (
+                                (param, idx) => 
+                                        Expression.Convert
+                                        (
+                                            inputParams.CreateArrayCellAccessExpression(idx), 
+                                            param.ParameterType)).ToArray();
 
             MethodCallExpression methodCallExpr = Expression.Call(methodInfo, paramSetters);
 
