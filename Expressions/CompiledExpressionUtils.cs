@@ -9,12 +9,14 @@
 // Also as a courtesy, please, mention this software in any documentation for the 
 // products that use it.
 
+using NP.Concepts.CodeMetaData;
 using NP.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace NP.Concepts.Expressions
@@ -357,7 +359,8 @@ namespace NP.Concepts.Expressions
         public static MethodCallExpression GetMethodCallFromParamArray
         (
             this MethodInfo methodInfo, 
-            ParameterExpression inputParams)
+            ParameterExpression inputParams,
+            object obj = null)
         {
             Expression[] paramSetters =
                 methodInfo.GetParameters()
@@ -368,17 +371,34 @@ namespace NP.Concepts.Expressions
                                         (
                                             inputParams.CreateArrayCellAccessExpression(idx), 
                                             param.ParameterType)).ToArray();
+            Expression instanceExpression = null;
 
-            MethodCallExpression methodCallExpr = Expression.Call(methodInfo, paramSetters);
+            if (obj != null)
+            {
+                instanceExpression = Expression.Constant(obj);
+            }
+
+            MethodCallExpression methodCallExpr = Expression.Call(instanceExpression, methodInfo, paramSetters);
 
             return methodCallExpr;
         }
 
-        public static Action<object[]> GetParamArrayLambdaForVoidMethod(this MethodInfo methodInfo)
+        /// <summary>
+        /// returns an Action&lt;object[]&gt; to call a void method specified by 
+        /// MethodInfo. If this method is not static, you should also provice 
+        /// the object info as obj argument
+        /// </summary>
+        /// <param name="methodInfo"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static Action<object[]> GetParamArrayLambdaForVoidMethod
+        (
+            this MethodInfo methodInfo,
+            object obj = null)
         {
             var array = Expression.Parameter(typeof(object[]), "inputParams");
 
-            MethodCallExpression methodCallExpr = methodInfo.GetMethodCallFromParamArray(array);
+            MethodCallExpression methodCallExpr = methodInfo.GetMethodCallFromParamArray(array, obj);
 
             var resultExpr = Expression.Lambda<Action<object[]>>(methodCallExpr, array);
 
@@ -387,11 +407,22 @@ namespace NP.Concepts.Expressions
             return result;
         }
 
-        public static Func<object[], object> GetParamArrayLambdaForReturningMethod(this MethodInfo methodInfo)
+        /// <summary>
+        /// returns an Func&lt;object[], object&gt; to call a NON-VOID method specified by 
+        /// MethodInfo. If this method is not static, you should also provice 
+        /// the object info as obj argument
+        /// </summary>
+        /// <param name="methodInfo"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static Func<object[], object> GetParamArrayLambdaForReturningMethod
+        (
+            this MethodInfo methodInfo,
+            object obj = null)
         {
             var array = Expression.Parameter(typeof(object[]), "inputParams");
-
-            MethodCallExpression methodCallExpr = methodInfo.GetMethodCallFromParamArray(array);
+            
+            MethodCallExpression methodCallExpr = methodInfo.GetMethodCallFromParamArray(array, obj);
 
             var finalExpr = Expression.Convert(methodCallExpr, typeof(object));
 
@@ -400,6 +431,259 @@ namespace NP.Concepts.Expressions
             var result = resultExpr.Compile();
 
             return result;
+        }
+
+
+        /// <summary>
+        /// this method is exact opposite of GetMethodCallFromParamArray. It creates a MethodCallExpression
+        /// on a method that takes an array of objects and whose parameters are passed as paramInfos 
+        /// collection. This method is used in the two methods below to create a void or a non-void Delegate
+        /// with the properly typed input arguments, that wrap a call to a void or object returning method
+        /// taking an array of objects as input arguments. 
+        /// </summary>
+        /// <param name="methodInfoForMethodAcceptingObjArray"></param>
+        /// <param name="paramInfos"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static (MethodCallExpression methodCallExpr, ParameterExpression[] paramExprs) 
+        GetMethodCallForOriginalMethodFromTakingObjArgs
+        (            
+            this MethodInfo methodInfoForMethodAcceptingObjArray,
+            IEnumerable<ParamInfo> paramInfos,
+            object obj = null,
+            params IParamValGetterExpressionInfo[] paramValGetterExpressionInfos)
+        {
+
+            Expression GetParamExpression(string paramName, Type paramType)
+            {
+                IParamValGetterExpressionInfo paramValGetterExpressionInfo =
+                    paramValGetterExpressionInfos
+                        .FirstOrDefault
+                        (
+                            paramValExpressionInfo =>
+                                paramValExpressionInfo.ParamName == paramName);
+
+                if (paramValGetterExpressionInfo == null)
+                {
+                    return Expression.Parameter(paramType, paramName);
+                }
+                else
+                {
+                    return paramValGetterExpressionInfo.ValueGetterExpression;
+                }
+            }
+            Expression[] parameterExpressions =
+                paramInfos
+                    .Select(paramInfo => GetParamExpression(paramInfo.ParamName, paramInfo.ParamType))
+                    .ToArray();
+
+            Expression[] objExpressions =
+                parameterExpressions
+                    .Select(paramExpr => Expression.Convert(paramExpr, typeof(object)))
+                    .ToArray();
+
+            MethodCallExpression methodCallExpression = null;
+
+            if (obj == null)
+            {
+
+                methodCallExpression = Expression.Call
+                (
+                    methodInfoForMethodAcceptingObjArray,
+                    Expression.NewArrayInit(typeof(object), objExpressions));
+            }
+            else
+            {
+                methodCallExpression = Expression.Call
+                (
+                    Expression.Constant(obj),
+                    methodInfoForMethodAcceptingObjArray,
+                    Expression.NewArrayInit(typeof(object), objExpressions));
+            }
+
+            return (methodCallExpression, parameterExpressions.OfType<ParameterExpression>().ToArray());
+        }
+
+        /// <summary>
+        /// this method wraps a void method that takes an array of objects into 
+        /// a void method with properly typed arguments (types are specified by 
+        /// paramInfos array)
+        /// </summary>
+        /// <param name="methodInfoForMethodAcceptingObjArray"></param>
+        /// <param name="paramInfos"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static Delegate GetLambdaForVoidMethodAcceptingObjArray
+        (
+            this MethodInfo methodInfoForMethodAcceptingObjArray, 
+            IEnumerable<ParamInfo> paramInfos,
+            object obj = null,
+            params IParamValGetterExpressionInfo[] paramValGetterExpressionInfos)
+        {
+
+            (MethodCallExpression methodCallerExpr, ParameterExpression[] paramExprs)  =
+                methodInfoForMethodAcceptingObjArray
+                    .GetMethodCallForOriginalMethodFromTakingObjArgs(paramInfos, obj, paramValGetterExpressionInfos);
+
+            return methodCallerExpr.GetDelegateFromExpr(paramExprs);
+        }
+
+        /// <summary>
+        /// this method wraps a method that takes an array of objects and returns an object, into 
+        /// a method with properly typed arguments (types are specified by 
+        /// paramInfos array) that returns a value of types specified by returingType input arg. 
+        /// If returning type is null, it will return a value of type 'object'. 
+        /// </summary>
+        /// <param name="methodInfoForMethodAcceptingObjArray"></param>
+        /// <param name="paramInfos"></param>
+        /// <param name="returningType"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static Delegate GetLambdaForObjReturningMethodAcceptingObjArray(
+            this MethodInfo methodInfoForMethodAcceptingObjArray,
+            IEnumerable<ParamInfo> paramInfos,
+            Type returningType = null,
+            object obj = null,
+            params IParamValGetterExpressionInfo[] paramValGetterExpressionInfos)
+        {
+            (MethodCallExpression methodCallerExpr, ParameterExpression[] paramExprs) =
+                methodInfoForMethodAcceptingObjArray
+                    .GetMethodCallForOriginalMethodFromTakingObjArgs(paramInfos, obj, paramValGetterExpressionInfos);
+
+            if (returningType == null)
+            {
+                returningType = typeof(object);
+            }
+
+            Expression methodCallerConversionExpr = 
+                Expression.Convert(methodCallerExpr, returningType);
+
+            return methodCallerConversionExpr.GetDelegateFromExpr(paramExprs);
+        }
+
+        public static Delegate GetDelegateFromExpr
+        (
+            this Expression expr, 
+            IEnumerable<ParameterExpression> exprParams)
+        {
+            var resultExpr = Expression.Lambda(expr, exprParams);
+
+            var compiledResult = resultExpr.Compile();
+
+            return compiledResult;
+        }
+
+
+
+        /// <summary>
+        /// returns the method call expression to call the method and the ParameterExpressions 
+        /// for calling the wrapped method. Parameters corresponding to the passed 
+        /// paramValGetterExpressionInfos argument, are not returned, since they are obtained
+        /// via IParamValGetterExpressionInfo.ValueGetterExpression and not via the arguments
+        /// of the wrapper method
+        /// </summary>
+        public static (MethodCallExpression methodCallExpression, ParameterExpression[] paramExpressions)
+            GetMethodCallExpression
+        (
+            this MethodInfo methodInfo,
+            object obj = null,
+            params IParamValGetterExpressionInfo[] paramValGetterExpressionInfos
+        )
+        {
+            if (methodInfo == null)
+                return (null, null);
+
+            Expression GetParamExpression(string paramName, Type paramType)
+            {
+                IParamValGetterExpressionInfo paramValGetterExpressionInfo =
+                    paramValGetterExpressionInfos
+                        .FirstOrDefault
+                        (
+                            paramValExpressionInfo => 
+                                paramValExpressionInfo.ParamName == paramName);
+
+                if (paramValGetterExpressionInfo == null)
+                {
+                    return Expression.Parameter(paramType, paramName);
+                }
+                else
+                {
+                    Expression resultExpression = 
+                        Expression.Convert(paramValGetterExpressionInfo.ValueGetterExpression, paramType);
+
+                    return resultExpression;
+                }
+            }
+
+            // obtains the expressions for the MethodInfo parameters including the expressions
+            // to be passed from the Wrapper Method - they are of type ParameterExpression and 
+            // the expressions to obtain the value via IParamValGetterExpressionInfo.ValueGetterExpression
+            // and conversion (of type UnaryExpression)
+            Expression[] paramExpressions =
+                methodInfo.GetParameters()
+                          .Select(paramInfo => GetParamExpression(paramInfo.Name, paramInfo.ParameterType))
+                          .ToArray();
+
+            Expression instanceExpr =
+                obj != null ? Expression.Constant(obj) : null;
+
+            MethodCallExpression methodCallExpression =
+                Expression.Call(instanceExpr, methodInfo, paramExpressions);
+
+            return (methodCallExpression, paramExpressions.OfType<ParameterExpression>().ToArray());
+        }
+
+        public static Delegate GetCompiledMethodCallLambda
+        (
+            this MethodInfo methodInfo,
+            object obj = null,
+
+            // these are parameters to the original method whose values are not received
+            // from the parameters of the generated method, but obtained via 
+            // IParamValGetterExpressionInfo.ValueGetterExpression
+            params IParamValGetterExpressionInfo[] paramValGetterExpressionInfos 
+        )
+        {
+            (MethodCallExpression methodCallExpression, ParameterExpression[] paramExpressions) =
+                methodInfo.GetMethodCallExpression(obj, paramValGetterExpressionInfos);
+
+            Delegate lambda = 
+                Expression.Lambda
+                (
+                    methodCallExpression, 
+                    paramExpressions)
+                .Compile();
+
+            return lambda;
+        }
+
+
+        public static Delegate GetCompiledMethodCallLambdaWithMethodToExecuteBeforeMain
+        (
+            this MethodInfo methodInfo,
+            object obj,
+            MethodCallExpression voidNoArgMethodCallToBeExecutedBeforeMainMethod,
+            params IParamValGetterExpressionInfo[] paramValGetterExpressionInfos
+        )
+        {
+            (MethodCallExpression methodCallExpression, ParameterExpression[] paramExpressions) =
+                methodInfo.GetMethodCallExpression(obj, paramValGetterExpressionInfos);
+
+            Expression combinedExpression =
+                Expression.Block
+                (
+                    voidNoArgMethodCallToBeExecutedBeforeMainMethod, 
+                    methodCallExpression);
+
+            Delegate lambda =
+                Expression.Lambda
+                (
+                    combinedExpression,
+                    paramExpressions)
+                .Compile();
+
+            return lambda;
+
         }
     }
 }

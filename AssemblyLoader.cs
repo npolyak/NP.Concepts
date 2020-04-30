@@ -13,8 +13,6 @@ namespace NP.Concepts
         static Dictionary<string, object> _locationsToLoadAssembliesFrom = new Dictionary<string, object>();
 
         private static Dictionary<Type, object> _assemblyAttrTypes = new Dictionary<Type, object>();
-        private static MetadataLoadContext TheMetadataLoadContext;
-
 
         public static void AddAssemblyAttrType(this Type assemblyAttrType)
         {
@@ -121,26 +119,14 @@ namespace NP.Concepts
 
             List<string> pluginFilePaths = dirs.GetPluginFilePaths().ToList();
 
-            //TheMetadataLoadContext = new MetadataLoadContext(new PathAssemblyResolver(pluginFilePaths));
-
-            foreach(var filePath in pluginFilePaths)
+            foreach (var filePath in pluginFilePaths)
             {
-                //Assembly assembly = 
-                //    TheMetadataLoadContext.LoadFromAssemblyPath(filePath);
+                Assembly assembly = Assembly.LoadFile(filePath);
 
-                //CustomAttributeData loadAssemblyAttributeData =
-                //        assembly.GetCustomAttributesData()
-                //                .FirstOrDefault(attrData => attrData.AttributeType.FullName == typeof(TLoadAssemblyAttribute).FullName);
-
-               // if (loadAssemblyAttributeData != null)
+                if (assembly.GetCustomAttributesData()
+                            .Any(attrData => attrData.AttributeType.FullName == assemblyAttributeType.FullName))
                 {
-                    Assembly assembly = Assembly.LoadFile(filePath);
-
-                    if (assembly.GetCustomAttributesData()
-                                .Any(attrData => attrData.AttributeType.FullName == assemblyAttributeType.FullName))
-                    {
-                        yield return assembly;
-                    }
+                    yield return assembly;
                 }
             }
         }
@@ -158,9 +144,9 @@ namespace NP.Concepts
         {
             foreach (Type typeFromAssembly in assembly.DefinedTypes)
             {
-                if (!typeFromAssembly.IsPublic ||
-                     typeFromAssembly.IsGenericType ||
-                     typeFromAssembly.IsAbstract)
+                if ( !typeFromAssembly.IsPublic ||
+                      //typeFromAssembly.IsGenericType ||
+                      (typeFromAssembly.IsAbstract && !typeFromAssembly.IsSealed) )
                 {
                     continue;
                 }

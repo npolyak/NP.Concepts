@@ -13,5 +13,7 @@ namespace NP.Concepts.DatumAttributes
         bool PropagateWhenConnected { get; }
 
         bool IsNotifiable { get; }
+
+        bool IsType { get; }
     }
 }

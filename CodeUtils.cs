@@ -132,9 +132,13 @@ namespace NP.Concepts
             return null;
         }
 
-        public static string GetMethodDefiners(this MethodInfo methodInfo, bool shouldOverride)
+        public static string GetMethodDefiners
+        (
+            this MethodInfo methodInfo, 
+            bool shouldOverride,
+            bool addEncapsulation = true)
         {
-            string result = methodInfo.GetEncapsulationStr() + " ";
+            string result = addEncapsulation ? methodInfo.GetEncapsulationStr() + " " : "";
             if (shouldOverride)
             {
                 result += "override ";
@@ -156,13 +160,14 @@ namespace NP.Concepts
             this MethodInfo methodInfo,
             bool shouldOverride = false,
             Func<Type, Type> genericArgToType = null,
-            Func<string, string> paramNameConverter = null
+            Func<string, string> paramNameConverter = null,
+            bool addEncapsulation = true
         )
         {
             if (methodInfo == null)
                 return string.Empty;
 
-            string result = methodInfo.GetMethodDefiners(shouldOverride);
+            string result = methodInfo.GetMethodDefiners(shouldOverride, addEncapsulation);
 
 
             if (!methodInfo.IsConstructor)
@@ -193,7 +198,7 @@ namespace NP.Concepts
             Type returnType = null
         )
         {
-            string returnTypeName = returnType?.Name ?? "void";
+            string returnTypeName = returnType?.GetTypeNameWithUnboxing() ?? "void";
 
             return $"public static {returnTypeName} {methodName}({paramInfos.StrConcat(paramInfo => GetParamStr(paramInfo.ParamType, paramInfo.ParamName))})";
         }
