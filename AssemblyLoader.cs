@@ -43,6 +43,13 @@ namespace NP.Concepts
         {
             Assembly requestingAssembly = args.RequestingAssembly;
 
+            string assemblyFullName = args.Name;
+
+            Assembly result = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyFullName);
+
+            if (result != null)
+                return result;
+             
             string assemblyName = args.GetAssemblyNameFromAssemblyResolveArgs();
 
             if (requestingAssembly == null)

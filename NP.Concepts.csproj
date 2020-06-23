@@ -5,7 +5,19 @@
     <AssemblyName>NP.Concepts</AssemblyName>
     <RootNamespace>NP.Concepts</RootNamespace>
   </PropertyGroup>
-
+  
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" Version="4.3.2">
+      <IncludeAssets>all</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Reactive.Core" Version="4.3.2">
+      <IncludeAssets>compile</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Reactive.Linq" Version="4.3.2">
+      <IncludeAssets>compile</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  
   <ItemGroup>
     <Compile Remove="Attributes\PropPartAttribute.cs" />
   </ItemGroup>

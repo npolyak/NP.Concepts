@@ -110,7 +110,7 @@ namespace NP.Concepts
 
         public static string GetParamStr(Type paramType, string paramName)
         {
-            return $"{paramType.GetTypeName()} {paramName}";
+            return $"{paramType.GetFullTypeName()} {paramName}";
         }
 
         public static string GetEncapsulationStr(this MethodInfo methodInfo)

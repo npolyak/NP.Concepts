@@ -8,11 +8,12 @@
 // 
 // Also, please, mention this software in any documentation for the 
 // products that use it.
+using NP.Utilities.BasicInterfaces;
 using System;
 
 namespace NP.Concepts.Behaviors
 {
-    internal class DisposableBehaviorContainer<T> : IDisposable
+    internal class DisposableBehaviorContainer<T> : IDisposable, ISuspendable
     {
         public IStatelessBehavior<T> TheBehavior { get; }
         public T TheObjectTheBehaviorIsAttachedTo { get; }
@@ -29,14 +30,24 @@ namespace NP.Concepts.Behaviors
             TheBehavior.Attach(TheObjectTheBehaviorIsAttachedTo);
         }
 
-        public void Dispose()
+        public void Suspend()
         {
-            TheBehavior?.Detach(TheObjectTheBehaviorIsAttachedTo);
+            TheBehavior?.Detach(TheObjectTheBehaviorIsAttachedTo, false);
         }
 
-        public void ResetBehavior()
+        public void Dispose()
         {
-            TheBehavior?.Reset(TheObjectTheBehaviorIsAttachedTo);
+            TheBehavior?.Detach(TheObjectTheBehaviorIsAttachedTo, true);
+        }
+
+        public void ResetBehavior(bool resetItems = true)
+        {
+            Reset(resetItems);
+        }
+
+        public void Reset(bool resetItems = true)
+        {
+            TheBehavior?.Reset(TheObjectTheBehaviorIsAttachedTo, resetItems);
         }
     }
 }

@@ -23,13 +23,13 @@ namespace NP.Concepts.Expressions
 {
     public static class CompiledExpressionUtils
     {
-        static DoubleParamMap<Type, string, Func<object, object>> _untypedGettersCache = 
+        static DoubleParamMap<Type, string, Func<object, object>> _untypedGettersCache =
             new DoubleParamMap<Type, string, Func<object, object>>();
 
 
         public static Func<object, object> GetUntypedCSPropertyGetterByObjType
         (
-            this Type objType, 
+            this Type objType,
             string propertyName
         )
         {
@@ -86,7 +86,7 @@ namespace NP.Concepts.Expressions
             Func<TObject, TProperty> result =
                 Expression.Lambda<Func<TObject, TProperty>>
                 (
-                    propertyGetterExpression, 
+                    propertyGetterExpression,
                     paramExpression
                 ).Compile();
 
@@ -95,12 +95,33 @@ namespace NP.Concepts.Expressions
             return result;
         }
 
+        private static
+            (
+                ParameterExpression objParamExpression,
+                ParameterExpression valueParamExpression,
+                MemberExpression propertyExpression,
+                UnaryExpression valueCastExpression) GetExpressions(this Type objType, string propertyName, Type propItemType)
+        {
+
+            ParameterExpression objParamExpression = Expression.Parameter(typeof(object));
+
+            UnaryExpression objCastExpression = Expression.Convert(objParamExpression, objType);
+
+            ParameterExpression valueParamExpression = Expression.Parameter(typeof(object));
+
+            UnaryExpression valueCastExpression = Expression.Convert(valueParamExpression, propItemType);
+
+            MemberExpression propertyExpression = Expression.Property(objCastExpression, propertyName);
+
+            return (objParamExpression, valueParamExpression, propertyExpression, valueCastExpression);
+        }
+
         static DoubleParamMap<Type, string, Action<object, object>> _untypedSettersCache =
             new DoubleParamMap<Type, string, Action<object, object>>();
 
         public static Action<object, object> GetUntypedCSPropertySetterByObjType
         (
-            this Type objType, 
+            this Type objType,
             string propertyName
         )
         {
@@ -110,19 +131,12 @@ namespace NP.Concepts.Expressions
             {
                 return result;
             }
-
             Type propertyType = objType.GetPropType(propertyName);
 
-            ParameterExpression objParamExpression = Expression.Parameter(typeof(object));
-
-            UnaryExpression objCastExpression = Expression.Convert(objParamExpression, objType);
-
-            ParameterExpression propertyParamExpression = Expression.Parameter(propertyType, propertyName);
-
-            ParameterExpression valueParamExpression = Expression.Parameter(typeof(object));
-            UnaryExpression valueCastExpression = Expression.Convert(valueParamExpression, propertyType);
-
-            MemberExpression propertyExpression = Expression.Property(objCastExpression, propertyName);
+            (ParameterExpression objParamExpression,
+                ParameterExpression valueParamExpression,
+                MemberExpression propertyExpression,
+                UnaryExpression valueCastExpression) = objType.GetExpressions(propertyName, propertyType);
 
             BinaryExpression assignExpression = Expression.Assign(propertyExpression, valueCastExpression);
 
@@ -136,6 +150,75 @@ namespace NP.Concepts.Expressions
             _untypedSettersCache.AddKeyValue(objType, propertyName, result);
 
             return result;
+        }
+
+        private static Action<object, object> CreateCollectionProcessor
+        (
+            this Type objType, 
+            string collectionPropName,
+            Type collectionProcessingClass, 
+            string collectionProcessingMethod,
+            DoubleParamMap<Type, string, Action<object, object>> cache)
+        {
+            Action<object, object> result;
+
+            if (cache.TryGetValue(objType, collectionPropName, out result))
+            {
+                return result;
+            }
+
+            Type cellType = objType.GetPropType(collectionPropName).GetCellTypeFromCollectionType();
+
+            (ParameterExpression objParamExpression,
+                ParameterExpression valueParamExpression,
+                MemberExpression propertyExpression,
+                UnaryExpression valueCastExpression) = objType.GetExpressions(collectionPropName, cellType);
+
+            MethodInfo genericMethodInfo = collectionProcessingClass.GetMethod(collectionProcessingMethod);
+
+            MethodInfo methodInfo = genericMethodInfo.MakeGenericMethod(cellType);
+
+            MethodCallExpression callExpr = Expression.Call(methodInfo, propertyExpression, valueCastExpression);
+
+            result = Expression.Lambda<Action<object, object>>(callExpr, objParamExpression, valueParamExpression).Compile();
+
+            cache.AddKeyValue(objType, collectionPropName, result);
+
+            return result;
+        }
+
+        static DoubleParamMap<Type, string, Action<object, object>> _untypedCollectionAddersCacher =
+                new DoubleParamMap<Type, string, Action<object, object>>();
+
+        public static Action<object, object> GetUntypedCSObjCollectionAdder
+        (
+            this Type objType,
+            string collectionPropName)
+        {
+            return objType
+                    .CreateCollectionProcessor
+                    (
+                        collectionPropName, 
+                        typeof(CollectionUtils), 
+                        nameof(CollectionUtils.AddIfNotThereSimple), 
+                        _untypedCollectionAddersCacher);
+        }
+
+        static DoubleParamMap<Type, string, Action<object, object>> _untypedCollectionRemoversCacher =
+            new DoubleParamMap<Type, string, Action<object, object>>();
+
+        public static Action<object, object> GetUntypedCSObjCollectionRemover
+        (
+            this Type objType,
+            string collectionPropName)
+        {
+            return objType
+                    .CreateCollectionProcessor
+                    (
+                        collectionPropName,
+                        typeof(CollectionUtils),
+                        nameof(CollectionUtils.RemoveItem),
+                        _untypedCollectionRemoversCacher);
         }
 
 
@@ -474,34 +557,43 @@ namespace NP.Concepts.Expressions
             }
             Expression[] parameterExpressions =
                 paramInfos
-                    .Select(paramInfo => GetParamExpression(paramInfo.ParamName, paramInfo.ParamType))
-                    .ToArray();
+                    ?.Select(paramInfo => GetParamExpression(paramInfo.ParamName, paramInfo.ParamType))
+                    ?.ToArray();
 
             Expression[] objExpressions =
                 parameterExpressions
-                    .Select(paramExpr => Expression.Convert(paramExpr, typeof(object)))
-                    .ToArray();
+                    ?.Select(paramExpr => Expression.Convert(paramExpr, typeof(object)))
+                    ?.ToArray();
 
             MethodCallExpression methodCallExpression = null;
 
             if (obj == null)
             {
 
-                methodCallExpression = Expression.Call
-                (
-                    methodInfoForMethodAcceptingObjArray,
-                    Expression.NewArrayInit(typeof(object), objExpressions));
+                methodCallExpression = objExpressions != null ?     
+                    Expression.Call
+                    (
+                        methodInfoForMethodAcceptingObjArray,
+                        Expression.NewArrayInit(typeof(object), objExpressions) ) 
+                    : 
+                    Expression.Call(methodInfoForMethodAcceptingObjArray);
             }
             else
             {
-                methodCallExpression = Expression.Call
-                (
-                    Expression.Constant(obj),
-                    methodInfoForMethodAcceptingObjArray,
-                    Expression.NewArrayInit(typeof(object), objExpressions));
+                methodCallExpression = objExpressions != null ? 
+                    Expression.Call
+                    (
+                        Expression.Constant(obj),
+                        methodInfoForMethodAcceptingObjArray,
+                        Expression.NewArrayInit(typeof(object), objExpressions))
+                    :
+                    Expression.Call
+                    (
+                        Expression.Constant(obj),
+                        methodInfoForMethodAcceptingObjArray);
             }
 
-            return (methodCallExpression, parameterExpressions.OfType<ParameterExpression>().ToArray());
+            return (methodCallExpression, parameterExpressions?.OfType<ParameterExpression>()?.ToArray());
         }
 
         /// <summary>
@@ -566,7 +658,9 @@ namespace NP.Concepts.Expressions
             this Expression expr, 
             IEnumerable<ParameterExpression> exprParams)
         {
-            var resultExpr = Expression.Lambda(expr, exprParams);
+            var resultExpr =
+                exprParams != null ? 
+                    Expression.Lambda(expr, exprParams) : Expression.Lambda(expr);
 
             var compiledResult = resultExpr.Compile();
 

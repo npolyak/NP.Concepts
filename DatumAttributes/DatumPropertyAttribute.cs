@@ -7,13 +7,6 @@ namespace NP.Concepts.DatumAttributes
     {
         public DatumPropertyDirection Direction { get; }
 
-        public Type DatumType { get; }
-
-        /// <summary>
-        /// lists the names of properties or methods for which it triggers changed
-        /// </summary>
-        public string[] TriggersChange { get; }
-
         #region IN Props
         public bool IsSaveable { get; }
         
@@ -23,14 +16,14 @@ namespace NP.Concepts.DatumAttributes
         /// type is Type
         /// </summary>
         public bool IsType { get; }
+
+        public bool IsCollection { get; set; } = false;
+
+        public bool IsPullAlways { get; }
         #endregion IN Props
 
         #region OUT Props
         public bool PropagateWhenConnected { get; }
-
-        public bool IsNotifiable { get; }
-
-        public DatumPropertyCondition TheDatumPropertyCondition { get; }
 
         #endregion OUT Props
 
@@ -39,11 +32,8 @@ namespace NP.Concepts.DatumAttributes
             DatumPropertyDirection datumDirection,
             bool isSaveable = false,
             bool propagateWhenConnected = true,
-            DatumPropertyCondition datumPropertyCondition = DatumPropertyCondition.None,
-            bool isNotifiable = true,
-            string[] triggersChange = null,
-            Type datumType = null,
-            bool isType = false)
+            bool isType = false, 
+            bool isPullAlways = false)
         {
             Direction = datumDirection;
 
@@ -51,15 +41,9 @@ namespace NP.Concepts.DatumAttributes
 
             PropagateWhenConnected = propagateWhenConnected;
 
-            TheDatumPropertyCondition = datumPropertyCondition;
-
-            IsNotifiable = isNotifiable;
-
-            TriggersChange = triggersChange;
-
-            DatumType = datumType;
-
             IsType = isType;
+
+            IsPullAlways = isPullAlways;
         }
     }
 }

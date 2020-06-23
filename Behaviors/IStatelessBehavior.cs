@@ -9,21 +9,37 @@
 // Also, please, mention this software in any documentation for the 
 // products that use it.
 
+using NP.Concepts.DatumAttributes;
+using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
+
 namespace NP.Concepts.Behaviors
 {
-    public interface IStatelessBehavior<T>
+    [DatumProcessor]
+    public interface IStatelessBehavior<in T>
     {
-        void Attach(T obj);
+        void Attach(T obj, bool setItems = true);
 
-        void Detach(T obj);
+        void Detach(T obj, bool unsetItems = true);
+    }
+
+    public interface ICollectionItemBehavior<in T>
+    {
+        protected void OnItemAdded(T item);
+        protected void OnItemRemoved(T item);
+    }
+
+    public interface ICollectionStatelessBehavior<in T> : IStatelessBehavior<IEnumerable<T>>, ICollectionItemBehavior<T>
+    {
+
     }
 
     public static class StatelessBehaviorUtils
     {
-        public static void Reset<T>(this IStatelessBehavior<T> behavior, T obj)
+        public static void Reset<T>(this IStatelessBehavior<T> behavior, T obj, bool resetItems = true)
         {
-            behavior.Detach(obj);
-            behavior.Attach(obj);
+            behavior.Detach(obj, resetItems);
+            behavior.Attach(obj, resetItems);
         }
     }
 }

@@ -9,14 +9,20 @@
 // Also, please, mention this software in any documentation for the 
 // products that use it.
 using NP.Utilities;
+using NP.Utilities.BasicInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace NP.Concepts.Behaviors
 {
+    public interface ISuspendableDisposable : ISuspendable, IDisposable
+    {
+
+    }
+
     // used to dispose of behaviors
-    public class BehaviorsDisposable<T> : IDisposable
+    public class BehaviorsDisposable<T> : ISuspendableDisposable
     {
         List<DisposableBehaviorContainer<T>> _disposableBehaviors = new List<DisposableBehaviorContainer<T>>();
 
@@ -38,17 +44,25 @@ namespace NP.Concepts.Behaviors
             _disposableBehaviors.Add(disposableBehaviorToAdd);
         }
 
-        public void Reset()
+        public void Reset(bool resetItems = true)
         {
-            foreach(var behaviorContainer in _disposableBehaviors)
+            foreach (var behaviorContainer in _disposableBehaviors)
             {
-                behaviorContainer.ResetBehavior();
+                behaviorContainer.Reset(resetItems);
+            }
+        }
+
+        public void Suspend()
+        {
+            foreach (DisposableBehaviorContainer<T> behaviorContainer in _disposableBehaviors)
+            {
+                behaviorContainer.Suspend();
             }
         }
 
         public void Dispose()
         {
-            foreach(DisposableBehaviorContainer<T> behaviorContainer in _disposableBehaviors)
+            foreach (DisposableBehaviorContainer<T> behaviorContainer in _disposableBehaviors)
             {
                 behaviorContainer.Dispose();
             }
