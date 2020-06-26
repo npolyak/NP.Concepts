@@ -30,15 +30,33 @@ namespace NP.Concepts.Behaviors
                     return;
                 }
 
-                (this as ICollectionStatelessBehavior<TItem>).Detach(_collection);
+                DetachCollection();
 
                 this._collection = value;
 
-                (this as ICollectionStatelessBehavior<TItem>).Attach(_collection);
+                AttachCollection();
             }
         }
         #endregion TheCollection Property
 
+        [DatumCallMethod]
+        public void DetachCollection()
+        {
+            (this as ICollectionStatelessBehavior<TItem>).Detach(_collection);
+        }
+
+        [DatumCallMethod]
+        public virtual void AttachCollection()
+        {
+            (this as ICollectionStatelessBehavior<TItem>).Attach(_collection);
+        }
+
+        [DatumCallMethod]
+        public void Reattach()
+        {
+            DetachCollection();
+            AttachCollection();
+        }
 
         void ICollectionItemBehavior<TItem>.OnItemAdded(TItem item)
         {
