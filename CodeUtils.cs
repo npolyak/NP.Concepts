@@ -63,7 +63,7 @@ namespace NP.Concepts
                 return "void";
             }
 
-            if (type.IsGenericType)
+            if (type.IsGenericType && !restoreFully)
             {
                 result += "<";
 
